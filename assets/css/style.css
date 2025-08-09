@@ -9,6 +9,9 @@ body {
     align-items: center;
     margin: 0;
     padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 /* 兼容 iOS 安全区 */
 :root {
@@ -60,8 +63,9 @@ body {
     border: 1.5px solid #7bb0ff;
     background: #e3f0ff;
     font-size: 22px;
-    line-height: 40px;
+    line-height: 1;
     text-align: center;
+    overflow: hidden;
     cursor: pointer;
     user-select: none;
     transition: background 0.15s, color 0.15s;
