@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>小游戏合集：扫雷 & 贪吃蛇 & 飞机大战</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div id="main-layout">
+        <div id="sidebar">
+            <button id="tab-minesweeper" onclick="showGame('minesweeper')">扫雷</button>
+            <button id="tab-snake" onclick="showGame('snake')">贪吃蛇</button>
+            <button id="tab-plane" onclick="showGame('plane')">飞机大战</button>
+            <button id="tab-mole" onclick="showGame('mole')">打地鼠</button>
+            <div id="lang-section">
+                <select id="lang-select" onchange="setLang(this.value)">
+                    <option value="zh">🇨🇳 中文</option>
+                    <option value="en">🇺🇸 English</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                </select>
+            </div>
+        </div>
+        <div id="game-contents">
+            <h1 id="main-title">小游戏合集</h1>
+            <div id="minesweeper-section">
+                <div id="game-controls">
+                    <button id="minesweeper-newgame" onclick="startGame()">开始新游戏</button>
+                    <span id="status"></span><span id="minesweeper-besttime"></span>
+                </div>
+                <div id="minefield"></div>
+            </div>
+            <div id="snake-section" style="display:none;">
+                <div id="snake-controls">
+                    <button id="snake-newgame" onclick="startSnake()">开始新游戏</button>
+                    <span id="snake-status"></span>
+                    <span id="snake-highscore"></span>
+                </div>
+                <canvas id="snake-canvas" width="480" height="480"></canvas>
+            </div>
+            <div id="plane-section" style="display:none;">
+                <div id="plane-controls">
+                    <button id="plane-newgame" onclick="startPlane()">开始新游戏</button>
+                    <span id="plane-status"></span>
+                    <span id="plane-highscore"></span>
+                </div>
+                <canvas id="plane-canvas" width="400" height="500"></canvas>
+            </div>
+            <div id="mole-section" style="display:none;">
+                <div id="mole-controls">
+                    <button id="mole-newgame" onclick="startMole()">开始新游戏</button>
+                    <span id="mole-status"></span>
+                    <span id="mole-highscore"></span>
+                </div>
+                <canvas id="mole-canvas" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="assets/js/minesweeper.js"></script>
+    <script src="assets/js/snake.js"></script>
+    <script src="assets/js/plane.js"></script>
+    <script src="assets/js/mole.js"></script>
+    <script>
+    const langMap = {
+        zh: {
+            title: '小游戏合集',
+            tabs: ['扫雷', '贪吃蛇', '飞机大战', '打地鼠'],
+            newgame: ['开始新游戏', '开始新游戏', '开始新游戏', '开始新游戏']
+        },
+        en: {
+            title: 'Mini Game Collection',
+            tabs: ['Minesweeper', 'Snake', 'Plane War', 'Whac-A-Mole'],
+            newgame: ['New Game', 'New Game', 'New Game', 'New Game']
+        },
+        ja: {
+            title: 'ミニゲームコレクション',
+            tabs: ['マインスイーパー', 'スネーク', 'シューティング', 'モグラたたき'],
+            newgame: ['新しいゲーム', '新しいゲーム', '新しいゲーム', '新しいゲーム']
+        }
+    };
+    function setLang(lang) {
+        document.getElementById('main-title').textContent = langMap[lang].title;
+        document.getElementById('tab-minesweeper').textContent = langMap[lang].tabs[0];
+        document.getElementById('tab-snake').textContent = langMap[lang].tabs[1];
+        document.getElementById('tab-plane').textContent = langMap[lang].tabs[2];
+        document.getElementById('tab-mole').textContent = langMap[lang].tabs[3];
+        document.getElementById('minesweeper-newgame').textContent = langMap[lang].newgame[0];
+        document.getElementById('snake-newgame').textContent = langMap[lang].newgame[1];
+        document.getElementById('plane-newgame').textContent = langMap[lang].newgame[2];
+        document.getElementById('mole-newgame').textContent = langMap[lang].newgame[3];
+    }
+    function showGame(game) {
+        document.getElementById('minesweeper-section').style.display = (game === 'minesweeper') ? '' : 'none';
+        document.getElementById('snake-section').style.display = (game === 'snake') ? '' : 'none';
+        document.getElementById('plane-section').style.display = (game === 'plane') ? '' : 'none';
+        document.getElementById('mole-section').style.display = (game === 'mole') ? '' : 'none';
+        document.getElementById('tab-minesweeper').classList.toggle('active', game === 'minesweeper');
+        document.getElementById('tab-snake').classList.toggle('active', game === 'snake');
+        document.getElementById('tab-plane').classList.toggle('active', game === 'plane');
+        document.getElementById('tab-mole').classList.toggle('active', game === 'mole');
+    }
+    // 默认显示扫雷
+    showGame('minesweeper');
+    setLang('zh');
+    </script>
+</body>
+</html> 

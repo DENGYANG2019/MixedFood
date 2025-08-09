@@ -1,0 +1,264 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f8fafc;
+    text-align: center;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+#main-title {
+    margin: 0;
+    padding: 20px 0;
+    width: 100%;
+    text-align: center;
+}
+#game-controls {
+    height: 3em;
+    min-height: 3em;
+    max-height: 3em;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+}
+#minefield {
+    width: 360px;
+    height: 360px;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(9, 40px);
+    gap: 0;
+    margin: 40px auto 0 auto;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: #e3f0ff;
+}
+.cell {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1.5px solid #7bb0ff;
+    background: #e3f0ff;
+    font-size: 22px;
+    line-height: 40px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, color 0.15s;
+}
+.cell.open {
+    background: #f6faff;
+    color: #2d5c88;
+    cursor: default;
+}
+.cell.flag {
+    background: #fffbe6;
+    color: #e6b800;
+}
+.cell.mine {
+    background: #ffeaea;
+    color: #e74c3c;
+}
+#tabs {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+#tabs button {
+    padding: 8px 24px;
+    margin: 0 8px;
+    border: none;
+    background: #e3f0ff;
+    color: #2d5c88;
+    font-size: 18px;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.2s, color 0.2s;
+}
+#tabs button.active {
+    background: #7bb0ff;
+    color: #fff;
+    font-weight: bold;
+}
+#snake-canvas {
+    background: #f6faff;
+    border: 2px solid #7bb0ff;
+    margin-top: 20px;
+    border-radius: 8px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+#plane-canvas {
+    background: #f6faff;
+    border: 2px solid #7bb0ff;
+    margin-top: 20px;
+    border-radius: 8px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+#plane-controls {
+    margin-bottom: 10px;
+}
+#main-layout {
+    display: flex;
+    width: 100vw;
+    height: calc(100vh - 80px);
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+#sidebar {
+    width: 140px;
+    background: #e3f0ff;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 24px 0 0 0;
+    min-height: 100%;
+    box-shadow: 2px 0 8px #e0e8f0;
+    flex-shrink: 0;
+}
+#sidebar button {
+    padding: 18px 0;
+    margin: 0 12px 18px 12px;
+    border: none;
+    background: #e3f0ff;
+    color: #2d5c88;
+    font-size: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.2s, color 0.2s;
+}
+#sidebar button.active {
+    background: #7bb0ff;
+    color: #fff;
+    font-weight: bold;
+}
+#lang-section {
+    margin-top: auto;
+    padding: 0 12px 24px 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#lang-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid #7bb0ff;
+    border-radius: 6px;
+    background: #fff;
+    color: #2d5c88;
+    font-size: 16px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+}
+#lang-select:focus {
+    border-color: #2d5c88;
+}
+#game-contents {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+    min-height: 100%;
+    padding-top: 20px;
+    margin-left: 0;
+}
+#status {
+    min-height: 2.5em;
+    height: 2.5em;
+    max-height: 2.5em;
+    line-height: 2.5em;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    gap: 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+#minesweeper-besttime {
+    padding-left: 10px;
+    font-size: 0.95em;
+    color: #888;
+}
+#status.win, #status.fail {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+#status.win {
+    color: #219a00;
+    font-weight: bold;
+    font-size: 1.3em;
+}
+#status.fail {
+    color: #e53935;
+    font-weight: bold;
+    font-size: 1.3em;
+}
+#minefield.win {
+    background: #e6ffe6;
+    transition: background 0.3s;
+}
+#minefield.fail {
+    background: #ffeaea;
+    transition: background 0.3s;
+}
+#status.flash, #minefield.flash {
+    animation: flash-anim 0.3s alternate 3 !important;
+}
+@keyframes flash-anim {
+    0% { box-shadow: 0 0 0 0 #fff0; background: inherit; }
+    40% { box-shadow: 0 0 16px 8px #fff8; background: #fffbe6; }
+    60% { box-shadow: 0 0 24px 12px #fff8; background: #fffbe6; }
+    100% { box-shadow: 0 0 0 0 #fff0; background: inherit; }
+}
+#status.win.flash, #minefield.win.flash {
+    animation: win-flash 0.3s alternate 3 !important;
+}
+@keyframes win-flash {
+    0% { background: #e6ffe6; color: #219a00; }
+    50% { background: #baffba; color: #fff; }
+    100% { background: #e6ffe6; color: #219a00; }
+}
+#status.fail.flash, #minefield.fail.flash {
+    animation: fail-flash 0.3s alternate 3 !important;
+}
+@keyframes fail-flash {
+    0% { background: #ffeaea; color: #e53935; }
+    50% { background: #ffbdbd; color: #fff; }
+    100% { background: #ffeaea; color: #e53935; }
+}
+/* 打地鼠样式 */
+#mole-section {
+    text-align: center;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#mole-controls {
+    margin-bottom: 10px;
+}
+#mole-canvas {
+    border: 2px solid #a0522d;
+    background: #f9e4b7;
+    margin: 0 auto;
+    display: block;
+    box-sizing: border-box;
+    max-width: 100%;
+} 
