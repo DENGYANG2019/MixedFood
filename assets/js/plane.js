@@ -250,4 +250,44 @@ window.addEventListener('keydown', function(e) {
         // 发射子弹
         bullets.push({x: plane.x + PLANE_WIDTH/2 - BULLET_WIDTH/2, y: plane.y - BULLET_HEIGHT});
     }
-}, { passive: false }); 
+}, { passive: false });
+
+// 移动端：在画布上拖动控制飞机位置，轻点发射子弹
+(function setupPlaneTouchControls() {
+    const canvas = document.getElementById('plane-canvas');
+    if (!canvas) return;
+    function toCanvasX(clientX) {
+        const rect = canvas.getBoundingClientRect();
+        const rel = (clientX - rect.left) / rect.width; // 0..1
+        return rel * PLANE_CANVAS_W;
+    }
+    let startX = 0, startY = 0, startTime = 0, maxMove = 0;
+    canvas.addEventListener('touchstart', function(e) {
+        if (document.getElementById('plane-section').style.display === 'none') return;
+        if (!e.touches || e.touches.length === 0) return;
+        const t = e.touches[0];
+        startX = t.clientX;
+        startY = t.clientY;
+        startTime = Date.now();
+        maxMove = 0;
+        const targetX = toCanvasX(t.clientX) - PLANE_WIDTH / 2;
+        plane.x = Math.max(0, Math.min(PLANE_CANVAS_W - PLANE_WIDTH, targetX));
+    }, { passive: true });
+    canvas.addEventListener('touchmove', function(e) {
+        if (document.getElementById('plane-section').style.display === 'none') return;
+        if (!e.touches || e.touches.length === 0) return;
+        const t = e.touches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        maxMove = Math.max(maxMove, Math.hypot(dx, dy));
+        const targetX = toCanvasX(t.clientX) - PLANE_WIDTH / 2;
+        plane.x = Math.max(0, Math.min(PLANE_CANVAS_W - PLANE_WIDTH, targetX));
+    }, { passive: true });
+    canvas.addEventListener('touchend', function(e) {
+        if (document.getElementById('plane-section').style.display === 'none') return;
+        const dt = Date.now() - startTime;
+        if (dt < 250 && maxMove < 12) {
+            bullets.push({x: plane.x + PLANE_WIDTH/2 - BULLET_WIDTH/2, y: plane.y - BULLET_HEIGHT});
+        }
+    }, { passive: true });
+})(); 
