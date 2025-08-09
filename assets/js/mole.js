@@ -11,15 +11,27 @@ let moleGame = {
 const moleCanvas = document.getElementById('mole-canvas');
 const moleCtx = moleCanvas ? moleCanvas.getContext('2d') : null;
 
+function getHoleCenter(index) {
+    const cols = 3;
+    const col = index % cols;
+    const row = Math.floor(index / cols);
+    const holeRadius = 40;
+    const canvasPadding = 20; // 让圆圈与画布边框留出空隙
+    const gapX = (moleCanvas.width - 2 * canvasPadding - 2 * holeRadius) / (cols - 1);
+    const gapY = (moleCanvas.height - 2 * canvasPadding - 2 * holeRadius) / (cols - 1);
+    const x = canvasPadding + holeRadius + col * gapX;
+    const y = canvasPadding + holeRadius + row * gapY;
+    return { x, y, holeRadius };
+}
+
 function drawMoleField() {
     if (!moleCtx) return;
-    moleCtx.clearRect(0, 0, 400, 400);
+    moleCtx.clearRect(0, 0, moleCanvas.width, moleCanvas.height);
     for (let i = 0; i < moleGame.holes; i++) {
-        let x = (i % 3) * 130 + 35;
-        let y = Math.floor(i / 3) * 130 + 35;
+        const { x, y, holeRadius } = getHoleCenter(i);
         // 洞
         moleCtx.beginPath();
-        moleCtx.arc(x, y, 40, 0, Math.PI * 2);
+        moleCtx.arc(x, y, holeRadius, 0, Math.PI * 2);
         moleCtx.fillStyle = '#a0522d';
         moleCtx.fill();
         // 地鼠
@@ -49,12 +61,13 @@ function moleClick(e) {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     for (let i = 0; i < moleGame.holes; i++) {
-        let cx = (i % 3) * 130 + 35;
-        let cy = Math.floor(i / 3) * 130 + 35;
-        if (Math.hypot(x - cx, y - cy) < 40) {
+        const { x: cx, y: cy, holeRadius } = getHoleCenter(i);
+        if (Math.hypot(x - cx, y - cy) < holeRadius) {
             if (i === moleGame.molePos) {
                 moleGame.score++;
-                document.getElementById('mole-status').textContent = '得分：' + moleGame.score;
+                const lang = window.currentLang || 'zh';
+                const scoreLabel = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.score) || '得分';
+                document.getElementById('mole-status').textContent = scoreLabel + '：' + moleGame.score;
                 randomMole();
             }
             break;
@@ -66,8 +79,11 @@ function startMole() {
     moleGame.score = 0;
     moleGame.time = 30;
     moleGame.running = true;
-    document.getElementById('mole-status').textContent = '得分：0';
-    document.getElementById('mole-highscore').textContent = '最高分：' + (moleGame.highscore || 0);
+    const lang = window.currentLang || 'zh';
+    const scoreLabel = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.score) || '得分';
+    const highLabel = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.highScore) || '最高分';
+    document.getElementById('mole-status').textContent = scoreLabel + '：0';
+    document.getElementById('mole-highscore').textContent = highLabel + '：' + (moleGame.highscore || 0);
     randomMole();
     if (moleGame.timer) clearInterval(moleGame.timer);
     moleGame.timer = setInterval(() => {
@@ -77,9 +93,10 @@ function startMole() {
             moleGame.running = false;
             if (moleGame.score > moleGame.highscore) {
                 moleGame.highscore = moleGame.score;
-                document.getElementById('mole-highscore').textContent = '最高分：' + moleGame.highscore;
+                document.getElementById('mole-highscore').textContent = highLabel + '：' + moleGame.highscore;
             }
-            document.getElementById('mole-status').textContent = '游戏结束，得分：' + moleGame.score;
+            const overText = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.gameOver) || '游戏失败！';
+            document.getElementById('mole-status').textContent = overText.replace('！', '') + '，' + scoreLabel + '：' + moleGame.score;
         } else {
             randomMole();
         }
@@ -103,7 +120,9 @@ function moleKeydown(e) {
         const idx = keyToHoleIdx[key];
         if (idx === moleGame.molePos) {
             moleGame.score++;
-            document.getElementById('mole-status').textContent = '得分：' + moleGame.score;
+            const lang2 = window.currentLang || 'zh';
+            const scoreLabel2 = (window.langMap && window.langMap[lang2] && window.langMap[lang2].labels.score) || '得分';
+            document.getElementById('mole-status').textContent = scoreLabel2 + '：' + moleGame.score;
             randomMole();
         }
     }

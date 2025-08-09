@@ -76,8 +76,10 @@ function renderMinefield() {
             container.appendChild(cell);
         }
     }
-    // 实时显示旗标数量
-    document.getElementById('status').textContent = `旗标：${flagCount} / ${MINES}` + (gameOver ? (document.getElementById('status').textContent ? ' ' + document.getElementById('status').textContent : '') : '');
+    // 实时显示旗标数量（多语言）
+    const lang = window.currentLang || 'zh';
+    const flagsLabel = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.flags) || '旗标';
+    document.getElementById('status').textContent = `${flagsLabel}：${flagCount} / ${MINES}` + (gameOver ? (document.getElementById('status').textContent ? ' ' + document.getElementById('status').textContent : '') : '');
 }
 
 function renderBestTime() {
@@ -87,8 +89,10 @@ function renderBestTime() {
         el.id = 'minesweeper-besttime';
         document.getElementById('status').parentNode.appendChild(el);
     }
+    const lang = window.currentLang || 'zh';
+    const bestLabel = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.bestTime) || '最快时间';
     if (bestTime !== null) {
-        el.textContent = ` 最快时间：${bestTime.toFixed(1)}秒`;
+        el.textContent = ` ${bestLabel}：${bestTime.toFixed(1)}秒`;
     } else {
         el.textContent = '';
     }
@@ -107,7 +111,9 @@ function handleCellClick(r, c) {
     if (minefield[r][c] === 'M') {
         gameOver = true;
         setGameStatus('fail', true);
-        document.getElementById('status').textContent = '游戏失败！';
+        const lang = window.currentLang || 'zh';
+        const gameOverText = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.gameOver) || '游戏失败！';
+        document.getElementById('status').textContent = gameOverText;
         revealAll();
         saveGame();
         return;
@@ -123,7 +129,9 @@ function handleCellClick(r, c) {
             localStorage.setItem('minesweeperBestTime', bestTime);
         }
         setGameStatus('win', true);
-        document.getElementById('status').textContent = `恭喜通关！用时：${used.toFixed(1)}秒`;
+        const lang = window.currentLang || 'zh';
+        const winPrefix = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.winUseTime) || '恭喜通关！用时：';
+        document.getElementById('status').textContent = `${winPrefix}${used.toFixed(1)}秒`;
         renderBestTime();
     }
     renderMinefield();
@@ -143,7 +151,9 @@ function handleFlag(r, c) {
             localStorage.setItem('minesweeperBestTime', bestTime);
         }
         setGameStatus('win', true);
-        document.getElementById('status').textContent = `恭喜通关！（旗标全部正确）用时：${used.toFixed(1)}秒`;
+        const lang = window.currentLang || 'zh';
+        const winFlagPrefix = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.winFlagAllUseTime) || '恭喜通关！（旗标全部正确）用时：';
+        document.getElementById('status').textContent = `${winFlagPrefix}${used.toFixed(1)}秒`;
         renderBestTime();
         revealAll();
         saveGame();

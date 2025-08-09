@@ -180,6 +180,15 @@ function planeGameLoop() {
 function drawPlaneGame() {
     const canvas = document.getElementById('plane-canvas');
     const ctx = canvas.getContext('2d');
+    // 根据 CSS 宽度在移动端提高清晰度
+    const cssWidth = Math.min(window.innerWidth * 0.92, PLANE_CANVAS_W);
+    const ratio = cssWidth / PLANE_CANVAS_W;
+    canvas.style.width = cssWidth + 'px';
+    canvas.style.height = Math.round(PLANE_CANVAS_H * ratio) + 'px';
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(PLANE_CANVAS_W * dpr * ratio);
+    canvas.height = Math.round(PLANE_CANVAS_H * dpr * ratio);
+    ctx.setTransform(dpr * ratio, 0, 0, dpr * ratio, 0, 0);
     ctx.clearRect(0, 0, PLANE_CANVAS_W, PLANE_CANVAS_H);
     
     // 画玩家飞机贴图
@@ -196,13 +205,17 @@ function drawPlaneGame() {
     }
     
     // 显示分数
-    document.getElementById('plane-status').textContent = '得分：' + planeScore;
+    const lang = window.currentLang || 'zh';
+    const scoreLabel = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.score) || '得分';
+    document.getElementById('plane-status').textContent = scoreLabel + '：' + planeScore;
 }
 
 function endPlane(msg) {
     clearInterval(planeTimer);
     planeGameOver = true;
-    document.getElementById('plane-status').textContent = msg + ' 得分：' + planeScore;
+    const lang = window.currentLang || 'zh';
+    const scoreLabel = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.score) || '得分';
+    document.getElementById('plane-status').textContent = msg + ' ' + scoreLabel + '：' + planeScore;
     updatePlaneHighScore();
 }
 
@@ -216,7 +229,9 @@ function updatePlaneHighScore() {
         high = planeScore;
         localStorage.setItem('planeHighScore', high);
     }
-    document.getElementById('plane-highscore').textContent = ' 最高分：' + high;
+    const lang = window.currentLang || 'zh';
+    const highLabel = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.highScore) || '最高分';
+    document.getElementById('plane-highscore').textContent = ' ' + highLabel + '：' + high;
 }
 
 window.addEventListener('keydown', function(e) {

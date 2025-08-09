@@ -2,18 +2,23 @@
 const SNAKE_SIZE = 24;
 const SNAKE_ROWS = 20;
 const SNAKE_COLS = 20;
-const SNAKE_CANVAS_W = SNAKE_COLS * SNAKE_SIZE;
-const SNAKE_CANVAS_H = SNAKE_ROWS * SNAKE_SIZE;
+const SNAKE_CANVAS_W = SNAKE_COLS * SNAKE_SIZE; // 480
+const SNAKE_CANVAS_H = SNAKE_ROWS * SNAKE_SIZE; // 480
 let snake, foods, direction, nextDirection, snakeTimer, snakeScore, snakeGameOver;
 
 function initSnakeGame() {
     const canvas = document.getElementById('snake-canvas');
-    canvas.width = SNAKE_CANVAS_W;
-    canvas.height = SNAKE_CANVAS_H;
+    // 依据 CSS 缩放宽度，按比例设置实际像素，提升移动端清晰度
+    const cssWidth = Math.min(window.innerWidth * 0.92, SNAKE_CANVAS_W);
+    const ratio = cssWidth / SNAKE_CANVAS_W;
+    canvas.style.width = cssWidth + 'px';
+    canvas.style.height = cssWidth + 'px';
+    canvas.width = Math.round(SNAKE_CANVAS_W * window.devicePixelRatio * ratio);
+    canvas.height = Math.round(SNAKE_CANVAS_H * window.devicePixelRatio * ratio);
+    const ctx = canvas.getContext('2d');
+    ctx.scale(window.devicePixelRatio * ratio, window.devicePixelRatio * ratio);
     // 检查canvas实际尺寸和逻辑尺寸是否一致
-    if (canvas.offsetWidth !== SNAKE_CANVAS_W || canvas.offsetHeight !== SNAKE_CANVAS_H) {
-        console.warn('警告：canvas实际显示尺寸与逻辑尺寸不一致，可能导致边界判定视觉异常！');
-    }
+    // 移动端适配后不再需要该警告
     startSnake();
 }
 
@@ -211,7 +216,9 @@ function drawSnake() {
         ctx.restore();
     }
     // 显示分数
-    document.getElementById('snake-status').textContent = '得分：' + snakeScore;
+    const lang = window.currentLang || 'zh';
+    const scoreLabel = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.score) || '得分';
+    document.getElementById('snake-status').textContent = scoreLabel + '：' + snakeScore;
 
     // 画深色外边框
     ctx.save();
@@ -225,7 +232,9 @@ function endSnake(msg) {
     clearInterval(snakeTimer);
     snakeGameOver = true;
     drawSnake(); // 游戏结束时再画一次，保证不会显示出界蛇头
-    document.getElementById('snake-status').textContent = msg + ' 得分：' + snakeScore;
+    const lang = window.currentLang || 'zh';
+    const scoreLabel = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.score) || '得分';
+    document.getElementById('snake-status').textContent = msg + ' ' + scoreLabel + '：' + snakeScore;
     updateSnakeHighScore();
 }
 
@@ -235,7 +244,9 @@ function updateSnakeHighScore() {
         high = snakeScore;
         localStorage.setItem('snakeHighScore', high);
     }
-    document.getElementById('snake-highscore').textContent = ' 最高分：' + high;
+    const lang = window.currentLang || 'zh';
+    const highLabel = (window.langMap && window.langMap[lang] && window.langMap[lang].labels.highScore) || '最高分';
+    document.getElementById('snake-highscore').textContent = ' ' + highLabel + '：' + high;
 }
 
 window.addEventListener('keydown', function(e) {
