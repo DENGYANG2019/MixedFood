@@ -265,6 +265,7 @@ window.addEventListener('keydown', function(e) {
     canvas.addEventListener('touchstart', function(e) {
         if (document.getElementById('plane-section').style.display === 'none') return;
         if (!e.touches || e.touches.length === 0) return;
+        e.preventDefault();
         const t = e.touches[0];
         startX = t.clientX;
         startY = t.clientY;
@@ -272,22 +273,24 @@ window.addEventListener('keydown', function(e) {
         maxMove = 0;
         const targetX = toCanvasX(t.clientX) - PLANE_WIDTH / 2;
         plane.x = Math.max(0, Math.min(PLANE_CANVAS_W - PLANE_WIDTH, targetX));
-    }, { passive: true });
+    }, { passive: false });
     canvas.addEventListener('touchmove', function(e) {
         if (document.getElementById('plane-section').style.display === 'none') return;
         if (!e.touches || e.touches.length === 0) return;
+        e.preventDefault();
         const t = e.touches[0];
         const dx = t.clientX - startX;
         const dy = t.clientY - startY;
         maxMove = Math.max(maxMove, Math.hypot(dx, dy));
         const targetX = toCanvasX(t.clientX) - PLANE_WIDTH / 2;
         plane.x = Math.max(0, Math.min(PLANE_CANVAS_W - PLANE_WIDTH, targetX));
-    }, { passive: true });
+    }, { passive: false });
     canvas.addEventListener('touchend', function(e) {
         if (document.getElementById('plane-section').style.display === 'none') return;
+        e.preventDefault();
         const dt = Date.now() - startTime;
         if (dt < 250 && maxMove < 12) {
             bullets.push({x: plane.x + PLANE_WIDTH/2 - BULLET_WIDTH/2, y: plane.y - BULLET_HEIGHT});
         }
-    }, { passive: true });
+    }, { passive: false });
 })(); 

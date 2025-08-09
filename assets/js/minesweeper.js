@@ -79,6 +79,7 @@ function renderMinefield() {
             cell.addEventListener('touchstart', (e) => {
                 if (gameOver) return;
                 if (!e.touches || e.touches.length === 0) return;
+                e.preventDefault();
                 const t = e.touches[0];
                 startX = t.clientX; startY = t.clientY; moved = false; didLongPress = false;
                 // 450ms 长按判定为插旗
@@ -86,13 +87,14 @@ function renderMinefield() {
                     didLongPress = true;
                     handleFlag(r, c);
                 }, 450);
-            }, { passive: true });
+            }, { passive: false });
             cell.addEventListener('touchmove', (e) => {
                 if (!e.touches || e.touches.length === 0) return;
+                e.preventDefault();
                 const t = e.touches[0];
                 const dx = t.clientX - startX, dy = t.clientY - startY;
                 if (Math.hypot(dx, dy) > 12) { moved = true; if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } }
-            }, { passive: true });
+            }, { passive: false });
             const finishTouch = (e) => {
                 if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
                 // 阻止生成点击事件，避免和 onclick 重复

@@ -47,6 +47,8 @@ body {
     overflow: hidden;
     background: #e3f0ff;
     touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 .cell {
     width: 100%;
@@ -63,6 +65,8 @@ body {
     cursor: pointer;
     user-select: none;
     transition: background 0.15s, color 0.15s;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 .cell.open {
     background: #f6faff;
@@ -109,6 +113,8 @@ body {
     width: min(92vw, 480px);
     height: auto;
     touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 #plane-canvas {
     background: #f6faff;
@@ -121,6 +127,8 @@ body {
     width: min(92vw, 400px);
     height: auto;
     touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 #plane-controls {
     margin-bottom: 10px;
@@ -297,6 +305,8 @@ body {
     width: min(92vw, 400px);
     height: auto;
     touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 /* 响应式：iPad/手机（竖屏或窄屏）将侧栏变为顶部菜单 */

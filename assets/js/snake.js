@@ -268,12 +268,19 @@ window.addEventListener('keydown', function(e) {
     canvas.addEventListener('touchstart', function(e) {
         if (document.getElementById('snake-section') && document.getElementById('snake-section').style.display === 'none') return;
         if (!e.touches || e.touches.length === 0) return;
+        e.preventDefault();
         const t = e.touches[0];
         startX = t.clientX;
         startY = t.clientY;
-    }, { passive: true });
+    }, { passive: false });
+    canvas.addEventListener('touchmove', function(e) {
+        if (document.getElementById('snake-section') && document.getElementById('snake-section').style.display === 'none') return;
+        // 阻止页面滚动
+        e.preventDefault();
+    }, { passive: false });
     canvas.addEventListener('touchend', function(e) {
         if (document.getElementById('snake-section') && document.getElementById('snake-section').style.display === 'none') return;
+        e.preventDefault();
         const t = e.changedTouches && e.changedTouches[0];
         if (!t) return;
         const dx = t.clientX - startX;
@@ -288,5 +295,5 @@ window.addEventListener('keydown', function(e) {
             if (dy < 0 && direction !== 'down') nextDirection = 'up';
             else if (dy > 0 && direction !== 'up') nextDirection = 'down';
         }
-    }, { passive: true });
+    }, { passive: false });
 })();
