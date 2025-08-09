@@ -73,6 +73,36 @@ function renderMinefield() {
             }
             cell.onclick = () => handleCellClick(r, c);
             cell.oncontextmenu = (e) => { e.preventDefault(); handleFlag(r, c); };
+            // 移动端：轻点翻开，长按插旗
+            let touchTimer = null;
+            let startX = 0, startY = 0, moved = false, didLongPress = false;
+            cell.addEventListener('touchstart', (e) => {
+                if (gameOver) return;
+                if (!e.touches || e.touches.length === 0) return;
+                const t = e.touches[0];
+                startX = t.clientX; startY = t.clientY; moved = false; didLongPress = false;
+                // 450ms 长按判定为插旗
+                touchTimer = setTimeout(() => {
+                    didLongPress = true;
+                    handleFlag(r, c);
+                }, 450);
+            }, { passive: true });
+            cell.addEventListener('touchmove', (e) => {
+                if (!e.touches || e.touches.length === 0) return;
+                const t = e.touches[0];
+                const dx = t.clientX - startX, dy = t.clientY - startY;
+                if (Math.hypot(dx, dy) > 12) { moved = true; if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } }
+            }, { passive: true });
+            const finishTouch = (e) => {
+                if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; }
+                // 阻止生成点击事件，避免和 onclick 重复
+                e.preventDefault();
+                if (!didLongPress && !moved) {
+                    handleCellClick(r, c);
+                }
+            };
+            cell.addEventListener('touchend', finishTouch, { passive: false });
+            cell.addEventListener('touchcancel', () => { if (touchTimer) { clearTimeout(touchTimer); touchTimer = null; } }, { passive: true });
             container.appendChild(cell);
         }
     }

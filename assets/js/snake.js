@@ -259,3 +259,34 @@ window.addEventListener('keydown', function(e) {
 }, { passive: false });
 
 // 自动初始化（可在index.html的snake-section显示时调用initSnakeGame）
+
+// 移动端：在画布上支持滑动控制方向
+(function setupSnakeTouchControls() {
+    const canvas = document.getElementById('snake-canvas');
+    if (!canvas) return;
+    let startX = 0, startY = 0;
+    canvas.addEventListener('touchstart', function(e) {
+        if (document.getElementById('snake-section') && document.getElementById('snake-section').style.display === 'none') return;
+        if (!e.touches || e.touches.length === 0) return;
+        const t = e.touches[0];
+        startX = t.clientX;
+        startY = t.clientY;
+    }, { passive: true });
+    canvas.addEventListener('touchend', function(e) {
+        if (document.getElementById('snake-section') && document.getElementById('snake-section').style.display === 'none') return;
+        const t = e.changedTouches && e.changedTouches[0];
+        if (!t) return;
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        const absX = Math.abs(dx), absY = Math.abs(dy);
+        const threshold = 20; // 滑动阈值
+        if (absX < threshold && absY < threshold) return;
+        if (absX > absY) {
+            if (dx < 0 && direction !== 'right') nextDirection = 'left';
+            else if (dx > 0 && direction !== 'left') nextDirection = 'right';
+        } else {
+            if (dy < 0 && direction !== 'down') nextDirection = 'up';
+            else if (dy > 0 && direction !== 'up') nextDirection = 'down';
+        }
+    }, { passive: true });
+})();
