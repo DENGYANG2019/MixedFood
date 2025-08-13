@@ -93,7 +93,13 @@
     document.getElementById('tetris-newgame').addEventListener('click', startTetris);
     document.getElementById('tetris-pause').addEventListener('click', togglePause);
     document.getElementById('tetris-reset').addEventListener('click', resetTetris);
-    const bindPress = (id, fn) => { const el = document.getElementById(id); if (!el) return; el.addEventListener('click', fn); el.addEventListener('touchstart', (e)=>{ e.preventDefault(); fn(); }, {passive:false}); };
+    const bindPress = (id, fn) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const handler = () => { if (isGameOver) return; if (!isRunning) startTetris(); fn(); };
+      el.addEventListener('click', handler);
+      el.addEventListener('touchstart', (e)=>{ e.preventDefault(); handler(); }, {passive:false});
+    };
     bindPress('tetris-left', ()=> tryMove(-1,0));
     bindPress('tetris-right', ()=> tryMove(1,0));
     bindPress('tetris-down', ()=> softDrop());
