@@ -15,6 +15,8 @@
                 <button id="tab-snake" onclick="showGame('snake')">贪吃蛇</button>
                 <button id="tab-plane" onclick="showGame('plane')">飞机大战</button>
                 <button id="tab-mole" onclick="showGame('mole')">打地鼠</button>
+                <!-- Add Tetris tab -->
+                <button id="tab-tetris" onclick="showGame('tetris')">俄罗斯方块</button>
             </div>
         </div>
         <div id="game-contents">
@@ -50,6 +52,32 @@
                 </div>
                 <canvas id="mole-canvas" width="400" height="400"></canvas>
             </div>
+            <!-- Tetris Section -->
+            <div id="tetris-section" style="display:none;">
+                <div id="tetris-controls">
+                    <button id="tetris-newgame">开始新游戏</button>
+                    <button id="tetris-pause">暂停/继续</button>
+                    <button id="tetris-reset">重置</button>
+                    <span id="tetris-status"></span>
+                </div>
+                <div id="tetris-stats">
+                    <span>得分：</span><span id="tetris-score">0</span>
+                    <span style="margin-left:12px;">行数：</span><span id="tetris-lines">0</span>
+                    <span style="margin-left:12px;">等级：</span><span id="tetris-level">1</span>
+                </div>
+                <div id="tetris-field" class="tetris-field">
+                    <canvas id="tetris-canvas" width="300" height="600" aria-label="Tetris field" role="img"></canvas>
+                    <div id="tetris-overlay" class="tetris-overlay" aria-live="polite" style="display:none;"></div>
+                </div>
+                <div id="tetris-next-wrap">
+                    <canvas class="tetris-next" id="tetris-next0" width="96" height="96"></canvas>
+                    <canvas class="tetris-next" id="tetris-next1" width="96" height="96"></canvas>
+                    <canvas class="tetris-next" id="tetris-next2" width="96" height="96"></canvas>
+                </div>
+                <div style="margin-top:8px; font-size: 14px; color:#666;">
+                    ← → 移动，↑ 旋转，↓ 下落，空格 直落，P 暂停，R 重置
+                </div>
+            </div>
         </div>
     </div>
     <script src="assets/js/minesweeper.js"></script>
@@ -63,8 +91,8 @@
         zh: {
             title: '小游戏合集',
             menu: '菜单',
-            tabs: ['扫雷', '贪吃蛇', '飞机大战', '打地鼠'],
-            newgame: ['开始新游戏', '开始新游戏', '开始新游戏', '开始新游戏'],
+            tabs: ['扫雷', '贪吃蛇', '飞机大战', '打地鼠', '俄罗斯方块'],
+            newgame: ['开始新游戏', '开始新游戏', '开始新游戏', '开始新游戏', '开始新游戏'],
             labels: {
                 flags: '旗标',
                 bestTime: '最快时间',
@@ -78,8 +106,8 @@
         en: {
             title: 'Mini Game Collection',
             menu: 'Menu',
-            tabs: ['Minesweeper', 'Snake', 'Plane War', 'Whac-A-Mole'],
-            newgame: ['New Game', 'New Game', 'New Game', 'New Game'],
+            tabs: ['Minesweeper', 'Snake', 'Plane War', 'Whac-A-Mole', 'Tetris'],
+            newgame: ['New Game', 'New Game', 'New Game', 'New Game', 'New Game'],
             labels: {
                 flags: 'Flags',
                 bestTime: 'Best Time',
@@ -93,8 +121,8 @@
         ja: {
             title: 'ミニゲームコレクション',
             menu: 'メニュー',
-            tabs: ['マインスイーパー', 'スネーク', 'シューティング', 'モグラたたき'],
-            newgame: ['新しいゲーム', '新しいゲーム', '新しいゲーム', '新しいゲーム'],
+            tabs: ['マインスイーパー', 'スネーク', 'シューティング', 'モグラたたき', 'テトリス'],
+            newgame: ['新しいゲーム', '新しいゲーム', '新しいゲーム', '新しいゲーム', '新しいゲーム'],
             labels: {
                 flags: '旗',
                 bestTime: '最速タイム',
@@ -119,15 +147,17 @@
         document.getElementById('tab-snake').textContent = langMap[lang].tabs[1];
         document.getElementById('tab-plane').textContent = langMap[lang].tabs[2];
         document.getElementById('tab-mole').textContent = langMap[lang].tabs[3];
+        document.getElementById('tab-tetris').textContent = langMap[lang].tabs[4];
         document.getElementById('minesweeper-newgame').textContent = langMap[lang].newgame[0];
         document.getElementById('snake-newgame').textContent = langMap[lang].newgame[1];
         document.getElementById('plane-newgame').textContent = langMap[lang].newgame[2];
         document.getElementById('mole-newgame').textContent = langMap[lang].newgame[3];
+        document.getElementById('tetris-newgame').textContent = langMap[lang].newgame[4];
         const toggleBtn = document.getElementById('menu-toggle');
         if (toggleBtn) toggleBtn.textContent = '☰ ' + langMap[lang].menu;
         // 语言切换后，刷新标题以匹配当前游戏
         if (currentGame) {
-            const mapIdx = { minesweeper:0, snake:1, plane:2, mole:3 };
+            const mapIdx = { minesweeper:0, snake:1, plane:2, mole:3, tetris:4 };
             document.getElementById('main-title').textContent = langMap[currentLang].tabs[mapIdx[currentGame]];
         }
     }
@@ -137,12 +167,14 @@
         document.getElementById('snake-section').style.display = (game === 'snake') ? '' : 'none';
         document.getElementById('plane-section').style.display = (game === 'plane') ? '' : 'none';
         document.getElementById('mole-section').style.display = (game === 'mole') ? '' : 'none';
+        document.getElementById('tetris-section').style.display = (game === 'tetris') ? '' : 'none';
         document.getElementById('tab-minesweeper').classList.toggle('active', game === 'minesweeper');
         document.getElementById('tab-snake').classList.toggle('active', game === 'snake');
         document.getElementById('tab-plane').classList.toggle('active', game === 'plane');
         document.getElementById('tab-mole').classList.toggle('active', game === 'mole');
+        document.getElementById('tab-tetris').classList.toggle('active', game === 'tetris');
         // 标题跟随所选游戏
-        const mapIdx = { minesweeper:0, snake:1, plane:2, mole:3 };
+        const mapIdx = { minesweeper:0, snake:1, plane:2, mole:3, tetris:4 };
         document.getElementById('main-title').textContent = langMap[currentLang].tabs[mapIdx[game]];
         // 小屏切换游戏后自动收起菜单
         if (window.innerWidth <= 900) {
@@ -167,5 +199,7 @@
         <button class="flag-btn" title="English" onclick="setLang('en')">🇺🇸</button>
         <button class="flag-btn" title="日本語" onclick="setLang('ja')">🇯🇵</button>
     </div>
+    <!-- Tetris script -->
+    <script src="assets/js/tetris.js"></script>
 </body>
 </html> 

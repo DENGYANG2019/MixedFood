@@ -381,3 +381,24 @@ body {
   #main-title { font-size: 24px; }
   #sidebar button { flex: 1 1 44%; min-width: 120px; }
 }
+
+/* === Tetris styles === */
+#tetris-controls { margin-top: 10px; display: flex; gap: 10px; align-items: center; justify-content: center; }
+#tetris-stats { margin: 10px 0; color: #2d5c88; }
+#tetris-field { position: relative; display: inline-block; }
+#tetris-canvas {
+  background: #f6faff;
+  border: 2px solid #7bb0ff;
+  border-radius: 8px;
+  display: block;
+  margin: 0 auto;
+  width: min(92vw, 300px);
+  height: auto;
+}
+.tetris-overlay {
+  position: absolute; inset: 0; display: none; place-items: center;
+  background: #0008; color: #fff; font-weight: bold; border-radius: 8px;
+}
+#tetris-next-wrap { display: grid; grid-template-columns: repeat(3, 96px); gap: 8px; margin: 12px auto; justify-content: center; }
+.tetris-next { background: #f6faff; border: 2px solid #7bb0ff55; border-radius: 8px; }
+@media (max-width: 480px){ #tetris-next-wrap { grid-template-columns: repeat(3, 82px); } .tetris-next { width: 82px; height: 82px; } }
