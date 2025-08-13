@@ -69,22 +69,23 @@
                     <canvas id="tetris-canvas" width="300" height="600" aria-label="Tetris field" role="img"></canvas>
                     <div id="tetris-overlay" class="tetris-overlay" aria-live="polite" style="display:none;"></div>
                 </div>
-                <div id="tetris-next-wrap">
-                    <canvas class="tetris-next" id="tetris-next0" width="96" height="96"></canvas>
-                    <canvas class="tetris-next" id="tetris-next1" width="96" height="96"></canvas>
-                    <canvas class="tetris-next" id="tetris-next2" width="96" height="96"></canvas>
+                <!-- Right-side actions + preview (mobile) -->
+                <div class="tetris-mobile-right" aria-label="右侧操作">
+                    <button id="tetris-rotate" class="ctrl action rotate" aria-label="Rotate">⟳</button>
+                    <div id="tetris-next-wrap" class="tetris-next-mobile">
+                        <canvas class="tetris-next" id="tetris-next0" width="96" height="96"></canvas>
+                        <canvas class="tetris-next" id="tetris-next1" width="96" height="96"></canvas>
+                        <canvas class="tetris-next" id="tetris-next2" width="96" height="96"></canvas>
+                    </div>
+                    <button id="tetris-drop" class="ctrl action primary" aria-label="Hard drop">⤓</button>
                 </div>
-                <div id="tetris-touch-controls" class="tetris-touch-controls">
-                  <div class="row">
-                    <button id="tetris-left" class="ctrl" aria-label="Left">←</button>
-                    <button id="tetris-down" class="ctrl" aria-label="Soft drop">↓</button>
-                    <button id="tetris-right" class="ctrl" aria-label="Right">→</button>
-                  </div>
-                  <div class="row">
-                    <button id="tetris-rotate" class="ctrl" aria-label="Rotate">⟳</button>
-                    <button id="tetris-drop" class="ctrl primary" aria-label="Hard drop">⤓</button>
-                  </div>
+                <!-- Bottom-left circular D-pad (mobile) -->
+                <div class="tetris-dpad" aria-label="方向键">
+                    <button id="tetris-left" class="ctrl dpad left" aria-label="Left">←</button>
+                    <button id="tetris-right" class="ctrl dpad right" aria-label="Right">→</button>
+                    <button id="tetris-down" class="ctrl dpad down" aria-label="Soft drop">↓</button>
                 </div>
+                <!-- helper text -->
                 <div style="margin-top:8px; font-size: 14px; color:#666;">
                     ← → 移动，↑ 旋转，↓ 下落，空格 直落，P 暂停，R 重置
                 </div>
