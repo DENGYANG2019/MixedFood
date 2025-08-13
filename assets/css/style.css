@@ -351,15 +351,14 @@ body {
     display: none;
   }
   #menu-buttons.expanded {
-}
-/* Touch actions for controls */
-.flag-btn, #menu-toggle, .tetris-touch-controls .ctrl { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     gap: 8px 12px;
   }
+/* Touch actions for controls */
+.flag-btn, #menu-toggle, .tetris-touch-controls .ctrl { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
   #sidebar button {
     margin: 0;
     flex: 1 1 140px;
