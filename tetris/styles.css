@@ -47,6 +47,7 @@ body {
   gap: 20px;
   padding: 20px;
   align-items: start;
+  position: relative;
 }
 
 .playfield {
@@ -161,13 +162,95 @@ canvas#gameCanvas {
   border-top: 1px solid #1a1f33;
 }
 
+/* Mobile controls */
+.mobile-dpad {
+  position: fixed;
+  left: 14px;
+  bottom: 14px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(23, 26, 43, 0.8);
+  box-shadow: inset 0 0 0 1px #242a45, 0 8px 24px rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+  display: none;
+}
+.pad-btn {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #283154;
+  border: none;
+  box-shadow: inset 0 0 0 1px #36406e, 0 6px 18px rgba(0,0,0,0.25);
+  color: transparent;
+}
+.pad-btn:active { transform: translateY(1px); }
+.pad-btn.up { top: 8px; left: 50%; transform: translateX(-50%); }
+.pad-btn.down { bottom: 8px; left: 50%; transform: translateX(-50%); }
+.pad-btn.left { left: 8px; top: 50%; transform: translateY(-50%); }
+.pad-btn.right { right: 8px; top: 50%; transform: translateY(-50%); }
+
+.mobile-actions {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  width: 112px;
+  display: none;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-items: center;
+  justify-items: center;
+  gap: 10px;
+}
+.action-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: none;
+  color: #fff;
+  font-size: 28px;
+  background: linear-gradient(180deg, #30406f 0%, #273255 100%);
+  box-shadow: inset 0 0 0 1px #3a4a86, 0 8px 22px rgba(0,0,0,0.35);
+}
+.action-btn.rotate { background: linear-gradient(180deg, var(--primary) 0%, var(--primary-700) 100%); }
+.action-btn.drop { background: linear-gradient(180deg, #36c879 0%, #2cb169 100%); }
+
+.mobile-next {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+/* Responsive layout to maximize playfield on small screens */
 @media (max-width: 900px) {
   .app__main {
     grid-template-columns: 1fr;
+    padding: 12px;
   }
   .sidebar {
     grid-template-columns: 1fr 1fr;
   }
+  /* Hide desktop NEXT panel on mobile since we show it on the right */
+  #nextPanel { display: none; }
+  /* Show on-screen controls */
+  .mobile-dpad, .mobile-actions { display: block; }
+  .mobile-actions { display: grid; }
+}
+
+@media (max-width: 600px) {
+  .mobile-dpad { width: 160px; height: 160px; }
+  .pad-btn { width: 52px; height: 52px; }
+  .action-btn { width: 72px; height: 72px; font-size: 24px; }
+}
+
+@media (max-width: 420px) {
+  .mobile-dpad { width: 140px; height: 140px; }
+  .pad-btn { width: 46px; height: 46px; }
+  .action-btn { width: 64px; height: 64px; font-size: 22px; }
+}
+
+@media (max-width: 900px) {
   .next-list {
     grid-template-columns: repeat(3, 96px);
     justify-content: center;

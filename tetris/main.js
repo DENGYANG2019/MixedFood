@@ -125,6 +125,16 @@ function setup() {
     c.width = 96; c.height = 96;
   }
 
+  // Mobile next canvases (if present)
+  for (let i = 0; i < 3; i++) {
+    const c = document.getElementById(`mnext${i}`);
+    if (c) {
+      nextCanvases.push(c);
+      nextCtxs.push(c.getContext('2d'));
+      c.width = 96; c.height = 96;
+    }
+  }
+
   bindUI();
   resetGame();
   draw();
@@ -175,6 +185,22 @@ function bindUI() {
         break;
     }
   });
+
+  // Bind mobile controls if present
+  const bindTap = (selector, handler) => {
+    const el = document.getElementById(selector);
+    if (!el) return;
+    const invoke = (ev) => { ev.preventDefault(); if (isRunning && !isGameOver) handler(); };
+    el.addEventListener('click', invoke, { passive: false });
+    el.addEventListener('touchstart', invoke, { passive: false });
+  };
+
+  bindTap('btnLeft', () => tryMove(-1, 0));
+  bindTap('btnRight', () => tryMove(1, 0));
+  bindTap('btnDown', () => softDrop());
+  bindTap('btnUp', () => rotate(+1));
+  bindTap('btnRotate', () => rotate(+1));
+  bindTap('btnSoftDrop', () => softDrop());
 }
 
 /** Game control */
@@ -473,11 +499,14 @@ function updateSidebar() {
 }
 
 function drawNextPreview() {
-  for (let i = 0; i < 3; i++) {
+  // Supports both desktop and mobile preview canvases stacked in arrays
+  // The first three contexts correspond to desktop, any additional three are mobile
+  for (let i = 0; i < nextCtxs.length; i++) {
     const ctxN = nextCtxs[i];
     const canvasN = nextCanvases[i];
+    if (!ctxN || !canvasN) continue;
     ctxN.clearRect(0, 0, canvasN.width, canvasN.height);
-    const type = nextQueue[i];
+    const type = nextQueue[i % 3];
     if (!type) continue;
 
     // center the piece inside 4x4 grid scaled
