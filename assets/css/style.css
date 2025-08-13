@@ -398,6 +398,7 @@ body {
 .tetris-overlay {
   position: absolute; inset: 0; display: none; place-items: center;
   background: #0008; color: #fff; font-weight: bold; border-radius: 8px;
+  pointer-events: none; /* do not block touch */
 }
 #tetris-next-wrap { display: grid; grid-template-columns: repeat(3, 96px); gap: 8px; margin: 12px auto; justify-content: center; }
 .tetris-next { background: #f6faff; border: 2px solid #7bb0ff55; border-radius: 8px; }

@@ -133,8 +133,16 @@
   }
 
   function resizeCanvasForDPR(){
-    const cssWidth = Math.min(window.innerWidth * 0.92, CANVAS_WIDTH);
-    const cssHeight = cssWidth * (CANVAS_HEIGHT / CANVAS_WIDTH);
+    // Fit by both width (92vw) and height (~56vh) to avoid overlong layout on mobile
+    const maxWidth = window.innerWidth * 0.92;
+    const maxHeight = Math.max(260, Math.min(window.innerHeight * 0.56, CANVAS_HEIGHT));
+    // start from height cap
+    let cssHeight = maxHeight;
+    let cssWidth = cssHeight * (CANVAS_WIDTH / CANVAS_HEIGHT);
+    if (cssWidth > maxWidth){
+      cssWidth = maxWidth;
+      cssHeight = cssWidth * (CANVAS_HEIGHT / CANVAS_WIDTH);
+    }
     canvas.style.width = cssWidth + 'px';
     canvas.style.height = cssHeight + 'px';
     const ratio = cssWidth / CANVAS_WIDTH;
@@ -143,6 +151,7 @@
     canvas.height = Math.round(CANVAS_HEIGHT * dpr * ratio);
     ctx.setTransform(1,0,0,1,0,0);
     ctx.scale(dpr * ratio, dpr * ratio);
+    resizePreviews();
   }
 
   function startTetris(){
@@ -303,7 +312,8 @@
       const ctxN = nextCtxs[i]; const c = nextCanvases[i]; if (!ctxN || !c) continue;
       ctxN.clearRect(0,0,c.width,c.height);
       const type = nextQueue[i]; if(!type) continue;
-      const cell=20, offX=Math.floor((c.width - cell*4)/2), offY=Math.floor((c.height - cell*4)/2);
+      const cell=Math.max(14, Math.min(20, Math.floor(c.width/4) - 2));
+      const offX=Math.floor((c.width - cell*4)/2), offY=Math.floor((c.height - cell*4)/2);
       const shape = SHAPES[type][0];
       for (const [dx,dy] of shape){ const x=dx+2, y=dy+2; drawMini(ctxN, offX+x*cell, offY+y*cell, cell, COLOR_BY_TYPE[type]); }
     }
@@ -324,6 +334,19 @@
   function showOverlay(msg){ const el=document.getElementById('tetris-overlay'); if (!el) return; el.textContent=msg; el.style.display='grid'; }
   function hideOverlay(){ const el=document.getElementById('tetris-overlay'); if (!el) return; el.style.display='none'; }
   function setGameOver(){ isRunning=false; isGameOver=true; showOverlay('游戏结束 (R重置)'); }
+
+  function resizePreviews(){
+    const wrap = document.getElementById('tetris-next-wrap');
+    if (!wrap) return;
+    const small = window.innerWidth < 420;
+    for (let i=0;i<3;i++){
+      const c = nextCanvases[i]; if (!c) continue;
+      const size = small ? 82 : 96;
+      c.style.width = size + 'px';
+      c.style.height = size + 'px';
+      c.width = size; c.height = size;
+    }
+  }
 
   // Simple swipe: horizontal -> move, vertical down -> soft drop, tap -> rotate, long press -> hard drop
   function bindSwipe(target){
