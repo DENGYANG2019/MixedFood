@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>テトリス</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app__header">
+        <h1>テトリス</h1>
+      </header>
+
+      <main class="app__main">
+        <section class="playfield">
+          <canvas id="gameCanvas" width="300" height="600" aria-label="ゲームフィールド" role="img"></canvas>
+          <div id="overlay" class="overlay hidden" aria-live="polite"></div>
+        </section>
+
+        <aside class="sidebar">
+          <div class="panel">
+            <div class="stat"><span>スコア</span><strong id="score">0</strong></div>
+            <div class="stat"><span>ライン</span><strong id="lines">0</strong></div>
+            <div class="stat"><span>レベル</span><strong id="level">1</strong></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__title">NEXT</div>
+            <div class="next-list">
+              <canvas class="next-canvas" id="next0" width="96" height="96"></canvas>
+              <canvas class="next-canvas" id="next1" width="96" height="96"></canvas>
+              <canvas class="next-canvas" id="next2" width="96" height="96"></canvas>
+            </div>
+          </div>
+
+          <div class="panel controls">
+            <button id="startBtn" class="btn primary">スタート</button>
+            <button id="pauseBtn" class="btn">一時停止</button>
+            <button id="resetBtn" class="btn">リセット</button>
+          </div>
+
+          <details class="panel help">
+            <summary>操作方法</summary>
+            <ul>
+              <li>← →: 水平移動</li>
+              <li>↑: 回転</li>
+              <li>↓: ソフトドロップ</li>
+              <li>Space: ハードドロップ</li>
+              <li>P: 一時停止/再開</li>
+              <li>R: リセット</li>
+            </ul>
+          </details>
+        </aside>
+      </main>
+
+      <footer class="app__footer">
+        <small>Made with ❤ in Canvas</small>
+      </footer>
+    </div>
+
+    <script src="./main.js"></script>
+  </body>
+</html>

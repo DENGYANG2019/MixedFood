@@ -5,6 +5,7 @@
 - 贪吃蛇（Snake）
 - 飞机大战（Plane）
 - 打地鼠（Whac-A-Mole）
+- 俄罗斯方块（Tetris）
 
 ## 运行方式
 - 直接双击或用浏览器打开 `index.html`。
