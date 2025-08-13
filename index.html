@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>小游戏合集：扫雷 & 贪吃蛇 & 飞机大战</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -219,12 +219,16 @@
         const toggle = document.getElementById('lang-toggle');
         const menu = document.getElementById('lang-menu');
         window.hideLangMenu = function(){ menu.hidden = true; toggle.setAttribute('aria-expanded','false'); };
+        function openMenu(){ menu.hidden = false; toggle.setAttribute('aria-expanded','true'); }
+        function closeMenu(){ menu.hidden = true; toggle.setAttribute('aria-expanded','false'); }
         toggle.addEventListener('click', (e)=>{
           e.stopPropagation();
-          const expanded = menu.hidden; menu.hidden = !expanded; toggle.setAttribute('aria-expanded', String(expanded));
+          if (menu.hidden) openMenu(); else closeMenu();
         });
+        toggle.addEventListener('touchstart', (e)=>{ e.stopPropagation(); if (menu.hidden) openMenu(); else closeMenu(); }, {passive:true});
         menu.addEventListener('click', (e)=>{ e.stopPropagation(); });
-        document.addEventListener('click', ()=>{ hideLangMenu(); });
+        document.addEventListener('click', ()=>{ closeMenu(); });
+        document.addEventListener('touchstart', ()=>{ closeMenu(); }, {passive:true});
       })();
     </script>
     <!-- Tetris script -->
