@@ -227,8 +227,12 @@
         });
         toggle.addEventListener('touchstart', (e)=>{ e.stopPropagation(); if (menu.hidden) openMenu(); else closeMenu(); }, {passive:true});
         menu.addEventListener('click', (e)=>{ e.stopPropagation(); });
-        document.addEventListener('click', ()=>{ closeMenu(); });
-        document.addEventListener('touchstart', ()=>{ closeMenu(); }, {passive:true});
+        document.addEventListener('click', (e)=>{
+          if (!menu.contains(e.target) && e.target !== toggle) closeMenu();
+        });
+        document.addEventListener('touchstart', (e)=>{
+          if (!menu.contains(e.target) && e.target !== toggle) closeMenu();
+        }, {passive:true});
       })();
     </script>
     <!-- Tetris script -->

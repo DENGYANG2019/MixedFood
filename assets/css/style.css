@@ -351,6 +351,9 @@ body {
     display: none;
   }
   #menu-buttons.expanded {
+}
+/* Touch actions for controls */
+.flag-btn, #menu-toggle, .tetris-touch-controls .ctrl { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     display: flex;
     flex-wrap: wrap;
     align-items: center;
