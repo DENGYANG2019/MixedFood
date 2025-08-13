@@ -402,3 +402,14 @@ body {
 #tetris-next-wrap { display: grid; grid-template-columns: repeat(3, 96px); gap: 8px; margin: 12px auto; justify-content: center; }
 .tetris-next { background: #f6faff; border: 2px solid #7bb0ff55; border-radius: 8px; }
 @media (max-width: 480px){ #tetris-next-wrap { grid-template-columns: repeat(3, 82px); } .tetris-next { width: 82px; height: 82px; } }
+
+/* Tetris touch controls */
+.tetris-touch-controls { display: grid; gap: 8px; margin: 10px auto; width: min(92vw, 320px); }
+.tetris-touch-controls .row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tetris-touch-controls .row:nth-child(2) { grid-template-columns: 1fr 1fr; }
+.tetris-touch-controls .ctrl {
+  padding: 12px 0; border: none; border-radius: 10px; font-size: 18px; background: #e3f0ff; color: #2d5c88;
+  box-shadow: 0 2px 8px #00000014; touch-action: manipulation;
+}
+.tetris-touch-controls .ctrl.primary { background: #7bb0ff; color: #fff; }
+@media (max-width: 480px){ .tetris-touch-controls .ctrl { padding: 14px 0; font-size: 20px; } }

@@ -93,6 +93,12 @@
     document.getElementById('tetris-newgame').addEventListener('click', startTetris);
     document.getElementById('tetris-pause').addEventListener('click', togglePause);
     document.getElementById('tetris-reset').addEventListener('click', resetTetris);
+    const bindPress = (id, fn) => { const el = document.getElementById(id); if (!el) return; el.addEventListener('click', fn); el.addEventListener('touchstart', (e)=>{ e.preventDefault(); fn(); }, {passive:false}); };
+    bindPress('tetris-left', ()=> tryMove(-1,0));
+    bindPress('tetris-right', ()=> tryMove(1,0));
+    bindPress('tetris-down', ()=> softDrop());
+    bindPress('tetris-rotate', ()=> rotate(+1));
+    bindPress('tetris-drop', ()=> hardDrop());
 
     window.addEventListener('keydown', (e) => {
       if (window.currentGame !== 'tetris') return;
@@ -112,6 +118,9 @@
     });
 
     window.addEventListener('resize', resizeCanvasForDPR);
+
+    // swipe gesture on canvas
+    bindSwipe(canvas);
 
     resetTetris();
     draw();
@@ -309,6 +318,33 @@
   function showOverlay(msg){ const el=document.getElementById('tetris-overlay'); if (!el) return; el.textContent=msg; el.style.display='grid'; }
   function hideOverlay(){ const el=document.getElementById('tetris-overlay'); if (!el) return; el.style.display='none'; }
   function setGameOver(){ isRunning=false; isGameOver=true; showOverlay('游戏结束 (R重置)'); }
+
+  // Simple swipe: horizontal -> move, vertical down -> soft drop, tap -> rotate, long press -> hard drop
+  function bindSwipe(target){
+    let startX=0, startY=0, startT=0, longPressTimer=null, moved=false;
+    const threshold = 20; // px
+    target.addEventListener('touchstart', (e)=>{
+      if (window.currentGame !== 'tetris') return;
+      const t = e.changedTouches[0]; startX=t.clientX; startY=t.clientY; startT=Date.now(); moved=false;
+      clearTimeout(longPressTimer);
+      longPressTimer = setTimeout(()=>{ if (!moved) hardDrop(); }, 500);
+    }, {passive:true});
+    target.addEventListener('touchmove', (e)=>{
+      if (window.currentGame !== 'tetris') return;
+      const t = e.changedTouches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY;
+      if (Math.abs(dx) > Math.abs(dy)){
+        if (Math.abs(dx) > threshold){ moved=true; if (dx>0) tryMove(1,0); else tryMove(-1,0); startX=t.clientX; startY=t.clientY; }
+      } else {
+        if (dy > threshold){ moved=true; softDrop(); startX=t.clientX; startY=t.clientY; }
+      }
+    }, {passive:true});
+    target.addEventListener('touchend', (e)=>{
+      if (window.currentGame !== 'tetris') return;
+      clearTimeout(longPressTimer);
+      const dt = Date.now()-startT; const t = e.changedTouches[0]; const dx=t.clientX-startX; const dy=t.clientY-startY;
+      if (!moved && dt < 250 && Math.abs(dx)<10 && Math.abs(dy)<10){ rotate(+1); }
+    }, {passive:true});
+  }
 
   document.addEventListener('DOMContentLoaded', init);
 })();
