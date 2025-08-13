@@ -420,3 +420,4 @@ body {
 #lang-toggle { width: 36px; height: 36px; font-size: 18px; border-radius: 8px; }
 .lang-menu { display: grid; gap: 6px; background: #ffffffee; border: 1px solid #7bb0ff33; border-radius: 8px; padding: 8px; box-shadow: 0 4px 16px #00000022; }
 .lang-menu .flag-btn { width: auto; height: 32px; line-height: 32px; padding: 0 8px; display: inline-flex; align-items: center; gap: 6px; }
+.lang-menu[hidden] { display: none !important; }

@@ -219,12 +219,12 @@
         const toggle = document.getElementById('lang-toggle');
         const menu = document.getElementById('lang-menu');
         window.hideLangMenu = function(){ menu.hidden = true; toggle.setAttribute('aria-expanded','false'); };
-        toggle.addEventListener('click', ()=>{
+        toggle.addEventListener('click', (e)=>{
+          e.stopPropagation();
           const expanded = menu.hidden; menu.hidden = !expanded; toggle.setAttribute('aria-expanded', String(expanded));
         });
-        document.addEventListener('click', (e)=>{
-          if (!menu.contains(e.target) && e.target !== toggle){ hideLangMenu(); }
-        });
+        menu.addEventListener('click', (e)=>{ e.stopPropagation(); });
+        document.addEventListener('click', ()=>{ hideLangMenu(); });
       })();
     </script>
     <!-- Tetris script -->
