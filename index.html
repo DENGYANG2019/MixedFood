@@ -205,12 +205,28 @@
     setLang('zh');
     showGame('minesweeper');
     </script>
-    <!-- 左下角悬浮语言切换（仅国旗） -->
+    <!-- 左下角悬浮语言切换（折叠） -->
     <div id="lang-floating" aria-label="language switcher">
-        <button class="flag-btn" title="中文" onclick="setLang('zh')">🇨🇳</button>
-        <button class="flag-btn" title="English" onclick="setLang('en')">🇺🇸</button>
-        <button class="flag-btn" title="日本語" onclick="setLang('ja')">🇯🇵</button>
+      <button id="lang-toggle" class="flag-btn" aria-expanded="false">🌐</button>
+      <div id="lang-menu" class="lang-menu" role="menu" hidden>
+        <button class="flag-btn" role="menuitem" title="中文" onclick="setLang('zh');hideLangMenu()">🇨🇳 中文</button>
+        <button class="flag-btn" role="menuitem" title="English" onclick="setLang('en');hideLangMenu()">🇺🇸 English</button>
+        <button class="flag-btn" role="menuitem" title="日本語" onclick="setLang('ja');hideLangMenu()">🇯🇵 日本語</button>
+      </div>
     </div>
+    <script>
+      (function(){
+        const toggle = document.getElementById('lang-toggle');
+        const menu = document.getElementById('lang-menu');
+        window.hideLangMenu = function(){ menu.hidden = true; toggle.setAttribute('aria-expanded','false'); };
+        toggle.addEventListener('click', ()=>{
+          const expanded = menu.hidden; menu.hidden = !expanded; toggle.setAttribute('aria-expanded', String(expanded));
+        });
+        document.addEventListener('click', (e)=>{
+          if (!menu.contains(e.target) && e.target !== toggle){ hideLangMenu(); }
+        });
+      })();
+    </script>
     <!-- Tetris script -->
     <script src="assets/js/tetris.js"></script>
 </body>
