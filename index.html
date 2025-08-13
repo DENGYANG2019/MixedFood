@@ -163,6 +163,7 @@
     }
     function showGame(game) {
         currentGame = game;
+        window.currentGame = currentGame;
         document.getElementById('minesweeper-section').style.display = (game === 'minesweeper') ? '' : 'none';
         document.getElementById('snake-section').style.display = (game === 'snake') ? '' : 'none';
         document.getElementById('plane-section').style.display = (game === 'plane') ? '' : 'none';
