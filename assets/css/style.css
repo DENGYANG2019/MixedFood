@@ -407,6 +407,14 @@ body {
 #tetris-next-wrap { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 12px auto; justify-content: center; }
 .tetris-next { background: #f6faff; border: 2px solid #7bb0ff55; border-radius: 8px; width: 60px; height: 60px; }
 
+/* 确保移动端预览样式优先级更高 */
+@media (max-width: 900px) {
+  #tetris-next-wrap.tetris-next-mobile {
+    margin: 0 !important;
+    justify-content: flex-end !important;
+  }
+}
+
 /* New mobile layout for Tetris */
 .tetris-mobile-right { display: none; }
 .tetris-dpad { display: none; }
@@ -423,11 +431,12 @@ body {
     z-index: 200;
   }
 
-  /* Place right-side actions at bottom-right */
+  /* Place right-side actions at right side (not bottom-right) */
   .tetris-mobile-right {
     position: fixed;
     right: max(10px, var(--safe-right));
-    bottom: max(10px, var(--safe-bottom));
+    top: 50%;
+    transform: translateY(-50%);
     display: grid;
     grid-template-rows: auto auto;
     align-items: center;
