@@ -82,13 +82,11 @@
     canvas = document.getElementById('tetris-canvas');
     if (!canvas) return;
     ctx = canvas.getContext('2d');
-    // next canvases
-    for (let i = 0; i < 3; i++) {
-      const c = document.getElementById(`tetris-next${i}`);
-      nextCanvases[i] = c;
-      nextCtxs[i] = c.getContext('2d');
-      c.width = 96; c.height = 96;
-    }
+    // next canvases - only one preview now
+    const c = document.getElementById('tetris-next0');
+    nextCanvases[0] = c;
+    nextCtxs[0] = c.getContext('2d');
+    c.width = 60; c.height = 60;
 
     document.getElementById('tetris-newgame').addEventListener('click', startTetris);
     document.getElementById('tetris-pause').addEventListener('click', togglePause);
@@ -308,15 +306,13 @@
   }
 
   function drawNext(){
-    for (let i=0;i<3;i++){
-      const ctxN = nextCtxs[i]; const c = nextCanvases[i]; if (!ctxN || !c) continue;
-      ctxN.clearRect(0,0,c.width,c.height);
-      const type = nextQueue[i]; if(!type) continue;
-      const cell=Math.max(14, Math.min(20, Math.floor(c.width/4) - 2));
-      const offX=Math.floor((c.width - cell*4)/2), offY=Math.floor((c.height - cell*4)/2);
-      const shape = SHAPES[type][0];
-      for (const [dx,dy] of shape){ const x=dx+2, y=dy+2; drawMini(ctxN, offX+x*cell, offY+y*cell, cell, COLOR_BY_TYPE[type]); }
-    }
+    const ctxN = nextCtxs[0]; const c = nextCanvases[0]; if (!ctxN || !c) return;
+    ctxN.clearRect(0,0,c.width,c.height);
+    const type = nextQueue[0]; if(!type) return;
+    const cell = Math.max(10, Math.min(14, Math.floor(c.width/4) - 2));
+    const offX = Math.floor((c.width - cell*4)/2), offY = Math.floor((c.height - cell*4)/2);
+    const shape = SHAPES[type][0];
+    for (const [dx,dy] of shape){ const x=dx+2, y=dy+2; drawMini(ctxN, offX+x*cell, offY+y*cell, cell, COLOR_BY_TYPE[type]); }
   }
   function drawMini(ctxN, px, py, size, color){
     const grad = ctxN.createLinearGradient(px,py,px,py+size);
@@ -338,14 +334,10 @@
   function resizePreviews(){
     const wrap = document.getElementById('tetris-next-wrap');
     if (!wrap) return;
-    const small = window.innerWidth < 420;
-    for (let i=0;i<3;i++){
-      const c = nextCanvases[i]; if (!c) continue;
-      const size = small ? 82 : 96;
-      c.style.width = size + 'px';
-      c.style.height = size + 'px';
-      c.width = size; c.height = size;
-    }
+    const c = nextCanvases[0]; if (!c) return;
+    c.style.width = '60px';
+    c.style.height = '60px';
+    c.width = 60; c.height = 60;
   }
 
   // Simple swipe: horizontal -> move, vertical down -> soft drop, tap -> rotate, long press -> hard drop
