@@ -468,7 +468,7 @@ body {
   .tetris-dpad .dpad.right { right: 6px; top: 50%; transform: translateY(-50%); }
   .tetris-dpad .dpad.down { left: 50%; bottom: 6px; transform: translateX(-50%); }
 
-  /* Move preview into the right column; hide desktop preview spacing */
+  /* Hide desktop preview spacing on mobile */
   #tetris-next-wrap { margin: 0; }
 }
 

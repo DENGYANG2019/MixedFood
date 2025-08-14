@@ -223,9 +223,20 @@
         function closeMenu(){ menu.hidden = true; toggle.setAttribute('aria-expanded','false'); }
         toggle.addEventListener('click', (e)=>{
           e.stopPropagation();
-          if (menu.hidden) openMenu(); else closeMenu();
+          if (menu.hidden) {
+            openMenu();
+          } else {
+            closeMenu();
+          }
         });
-        toggle.addEventListener('touchstart', (e)=>{ e.stopPropagation(); if (menu.hidden) openMenu(); else closeMenu(); }, {passive:true});
+        toggle.addEventListener('touchstart', (e)=>{ 
+          e.stopPropagation(); 
+          if (menu.hidden) {
+            openMenu();
+          } else {
+            closeMenu();
+          }
+        }, {passive:true});
         menu.addEventListener('click', (e)=>{ e.stopPropagation(); });
         document.addEventListener('click', (e)=>{
           if (!menu.contains(e.target) && e.target !== toggle) closeMenu();
