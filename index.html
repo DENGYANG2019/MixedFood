@@ -69,12 +69,13 @@
                     <canvas id="tetris-canvas" width="300" height="600" aria-label="Tetris field" role="img"></canvas>
                     <div id="tetris-overlay" class="tetris-overlay" aria-live="polite" style="display:none;"></div>
                 </div>
-                <!-- Right-side actions + preview (mobile) -->
+                <!-- Right-side preview (mobile) -->
+                <div id="tetris-next-wrap" class="tetris-next-mobile">
+                    <canvas class="tetris-next" id="tetris-next0" width="60" height="60"></canvas>
+                </div>
+                <!-- Right-side actions (mobile) -->
                 <div class="tetris-mobile-right" aria-label="右侧操作">
                     <button id="tetris-rotate" class="ctrl action rotate" aria-label="Rotate">⟳</button>
-                    <div id="tetris-next-wrap" class="tetris-next-mobile">
-                        <canvas class="tetris-next" id="tetris-next0" width="60" height="60"></canvas>
-                    </div>
                     <button id="tetris-drop" class="ctrl action primary" aria-label="Hard drop">⤓</button>
                 </div>
                 <!-- Bottom-left circular D-pad (mobile) -->
@@ -208,9 +209,9 @@
     <div id="lang-floating" aria-label="language switcher">
       <button id="lang-toggle" class="flag-btn" aria-expanded="false">🌐</button>
       <div id="lang-menu" class="lang-menu" role="menu" hidden>
-        <button class="flag-btn" role="menuitem" title="中文" onclick="setLang('zh');hideLangMenu()">🇨🇳 中文</button>
-        <button class="flag-btn" role="menuitem" title="English" onclick="setLang('en');hideLangMenu()">🇺🇸 English</button>
-        <button class="flag-btn" role="menuitem" title="日本語" onclick="setLang('ja');hideLangMenu()">🇯🇵 日本語</button>
+        <button class="flag-btn" role="menuitem" title="中文" onclick="setLang('zh');hideLangMenu()">🇨🇳</button>
+        <button class="flag-btn" role="menuitem" title="English" onclick="setLang('en');hideLangMenu()">🇺🇸</button>
+        <button class="flag-btn" role="menuitem" title="日本語" onclick="setLang('ja');hideLangMenu()">🇯🇵</button>
       </div>
     </div>
     <script>

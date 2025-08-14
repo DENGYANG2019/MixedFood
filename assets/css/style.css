@@ -412,13 +412,24 @@ body {
 .tetris-dpad { display: none; }
 
 @media (max-width: 900px) {
-  /* Place right-side actions vertically on the right bottom */
-  .tetris-mobile-right {
+  /* Place right-side preview at top-right */
+  .tetris-next-mobile {
     position: fixed;
     right: max(10px, var(--safe-right));
     top: max(120px, var(--safe-top) + 80px);
     display: grid;
-    grid-template-rows: auto auto auto;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    z-index: 200;
+  }
+
+  /* Place right-side actions at bottom-right */
+  .tetris-mobile-right {
+    position: fixed;
+    right: max(10px, var(--safe-right));
+    bottom: max(10px, var(--safe-bottom));
+    display: grid;
+    grid-template-rows: auto auto;
     align-items: center;
     justify-items: center;
     gap: 10px;
@@ -436,7 +447,6 @@ body {
   }
   .tetris-mobile-right .action.rotate { background: linear-gradient(180deg, rgba(123, 176, 255, 0.8), rgba(45, 92, 136, 0.8)); }
   .tetris-mobile-right .action.primary { background: linear-gradient(180deg, rgba(54, 200, 121, 0.8), rgba(44, 177, 105, 0.8)); }
-  .tetris-next-mobile { display: grid; grid-template-columns: 1fr; gap: 8px; }
 
   /* Bottom-left circular D-pad */
   .tetris-dpad {
