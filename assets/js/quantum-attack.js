@@ -23,13 +23,13 @@ class QuantumAttack {
         this.frameY = 10; // vertical position (0-14)
         this.activeFrame = 0; // 0 = left frame, 1 = right frame
         
-        // Block types with quantum states
+        // Block types with quantum states (lighter colors)
         this.blockTypes = [
-            { color: '#ff0000', symbol: '●', value: 1, quantumState: '|↑⟩' }, // Red - Spin Up
-            { color: '#0000ff', symbol: '■', value: 2, quantumState: '|↓⟩' }, // Blue - Spin Down
-            { color: '#ffff00', symbol: '◆', value: 3, quantumState: '|+⟩' }, // Yellow - Superposition
-            { color: '#ff00ff', symbol: '▲', value: 4, quantumState: '|∞⟩' }, // Magenta - Entangled
-            { color: '#00ff00', symbol: '★', value: 5, quantumState: '|0⟩' }  // Green - Ground State
+            { color: '#ff8888', symbol: '●', value: 1, quantumState: '|↑⟩' }, // Light Red - Spin Up
+            { color: '#8888ff', symbol: '■', value: 2, quantumState: '|↓⟩' }, // Light Blue - Spin Down
+            { color: '#ffff88', symbol: '◆', value: 3, quantumState: '|+⟩' }, // Light Yellow - Superposition
+            { color: '#ff88ff', symbol: '▲', value: 4, quantumState: '|∞⟩' }, // Light Magenta - Entangled
+            { color: '#88ff88', symbol: '★', value: 5, quantumState: '|0⟩' }  // Light Green - Ground State
         ];
         
         // Game timing
@@ -406,7 +406,7 @@ class QuantumAttack {
                     );
                     
                     // Draw quantum state symbol
-                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.fillStyle = '#000000';
                     this.ctx.font = 'bold 10px Arial';
                     this.ctx.textAlign = 'center';
                     this.ctx.fillText(
@@ -439,17 +439,17 @@ class QuantumAttack {
         const framePixelY = offsetY + this.frameY * this.blockSize;
         
         // Draw left square frame
-        this.ctx.strokeStyle = this.activeFrame === 0 ? '#ffff00' : '#666666';
+        this.ctx.strokeStyle = this.activeFrame === 0 ? '#00ff00' : '#888888';
         this.ctx.lineWidth = this.activeFrame === 0 ? 4 : 2;
         this.ctx.strokeRect(framePixelX, framePixelY, this.blockSize, this.blockSize);
         
         // Draw right square frame (adjacent to left)
-        this.ctx.strokeStyle = this.activeFrame === 1 ? '#ff00ff' : '#666666';
+        this.ctx.strokeStyle = this.activeFrame === 1 ? '#00ff00' : '#888888';
         this.ctx.lineWidth = this.activeFrame === 1 ? 4 : 2;
         this.ctx.strokeRect(framePixelX + this.blockSize, framePixelY, this.blockSize, this.blockSize);
         
         // Draw connecting line between frames
-        this.ctx.strokeStyle = '#ffffff';
+        this.ctx.strokeStyle = '#88ff88';
         this.ctx.lineWidth = 2;
         this.ctx.beginPath();
         this.ctx.moveTo(framePixelX + this.blockSize, framePixelY + this.blockSize / 4);
