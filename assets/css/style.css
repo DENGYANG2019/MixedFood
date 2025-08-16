@@ -588,7 +588,7 @@ body {
 .quantum-action-btn:last-child { background: rgba(150, 0, 200, 0.8); } /* field */
 
 /* Show touch controls on touch devices */
-@media (hover: none) and (pointer: coarse) {
+@media (max-width: 1024px) {
     .quantum-mobile-controls {
         display: flex !important;
     }
@@ -599,6 +599,12 @@ body {
     
     .mobile-controls {
         display: inline !important;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .quantum-mobile-controls {
+        display: flex !important;
     }
 }
 

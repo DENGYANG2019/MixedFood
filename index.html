@@ -102,25 +102,21 @@
                 <div id="quantum-info">
                     <span id="quantum-highscore"></span>
                 </div>
-                <canvas id="quantum-canvas" width="500" height="600" aria-label="Quantum Attack field" role="img"></canvas>
+                <canvas id="quantum-canvas" width="400" height="500" aria-label="Quantum Attack field" role="img"></canvas>
                 
                 <!-- Touch controls for mobile/iPad -->
                 <div class="quantum-mobile-controls" style="display: none;">
                     <div class="quantum-states">
-                        <button id="quantum-state-up" class="quantum-state-btn" title="Spin Up">↑</button>
-                        <button id="quantum-state-down" class="quantum-state-btn" title="Spin Down">↓</button>
-                        <button id="quantum-state-super" class="quantum-state-btn" title="Superposition">⟡</button>
-                        <button id="quantum-state-entangled" class="quantum-state-btn" title="Entangled">∞</button>
-                    </div>
-                    <div class="quantum-actions">
-                        <button id="quantum-fire-btn" class="quantum-action-btn" title="Fire Laser">🔫</button>
-                        <button id="quantum-field-btn" class="quantum-action-btn" title="Quantum Field">⚡</button>
+                        <button id="quantum-move-left" class="quantum-state-btn" title="Move Left">←</button>
+                        <button id="quantum-move-right" class="quantum-state-btn" title="Move Right">→</button>
+                        <button id="quantum-switch-frame" class="quantum-state-btn" title="Switch Frame">⇅</button>
+                        <button id="quantum-swap-blocks" class="quantum-state-btn" title="Swap Blocks">⇄</button>
                     </div>
                 </div>
                 
                 <div style="margin-top:8px; font-size: 14px; color:#666;">
-                    <span class="desktop-controls">← → 移动，空格 发射，Q/W/E/R 量子状态，F 量子场</span>
-                    <span class="mobile-controls" style="display: none;">タッチで移動・射撃、下のボタンで量子状態変更</span>
+                    <span class="desktop-controls">← → 移动枠，↑↓ 切换枠，空格 交换块</span>
+                    <span class="mobile-controls" style="display: none;">タッチで操作、ボタンで枠移動・ブロック交換</span>
                 </div>
             </div>
         </div>

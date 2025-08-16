@@ -1,5 +1,5 @@
-// Quantum Attack Game
-// A game where players defend against quantum particles using quantum mechanics
+// Quantum Attack - Block Puzzle Game
+// A game where players control two frames to swap blocks and clear lines
 
 class QuantumAttack {
     constructor() {
@@ -8,76 +8,98 @@ class QuantumAttack {
         this.gameRunning = false;
         this.score = 0;
         this.level = 1;
-        this.lives = 3;
-        this.particles = [];
-        this.player = null;
-        this.quantumFields = [];
-        this.lasers = [];
-        this.powerUps = [];
-        this.animationId = null;
-        this.keys = {};
-        this.lastTime = 0;
-        this.spawnTimer = 0;
-        this.fieldTimer = 0;
-        this.gameState = 'menu'; // menu, playing, paused, gameOver
+        this.lines = 0;
+        this.gameState = 'title'; // title, playing, paused, gameOver
         this.highScore = parseInt(localStorage.getItem('quantum-attack-highscore') || '0');
         
-        // Quantum states
-        this.quantumStates = ['spin-up', 'spin-down', 'superposition', 'entangled'];
-        this.playerState = 'superposition';
+        // Game grid
+        this.gridWidth = 8;
+        this.gridHeight = 16;
+        this.grid = [];
+        this.blockSize = 25;
         
-        // Game settings
-        this.settings = {
-            particleSpeed: 2,
-            spawnRate: 2000, // milliseconds
-            fieldDuration: 5000,
-            laserSpeed: 8,
-            playerSpeed: 5
-        };
+        // Two frames for block swapping
+        this.framePosition = 3; // horizontal position (0-6)
+        this.activeFrame = 0; // 0 = top frame, 1 = bottom frame
+        
+        // Block types
+        this.blockTypes = [
+            { color: '#ff0000', symbol: '●', value: 1 }, // Red
+            { color: '#0000ff', symbol: '■', value: 2 }, // Blue
+            { color: '#ffff00', symbol: '◆', value: 3 }, // Yellow
+            { color: '#ff00ff', symbol: '▲', value: 4 }, // Magenta
+            { color: '#00ff00', symbol: '★', value: 5 }  // Green
+        ];
+        
+        // Game timing
+        this.dropTimer = 0;
+        this.dropInterval = 1000; // milliseconds
+        this.lastTime = 0;
+        
+        this.animationId = null;
+        this.keys = {};
     }
 
     init(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         
-        // Initialize player
-        this.player = {
-            x: this.canvas.width / 2,
-            y: this.canvas.height - 50,
-            width: 30,
-            height: 30,
-            state: 'superposition',
-            energy: 100
-        };
-        
+        // Initialize grid
+        this.initGrid();
         this.setupEventListeners();
         this.gameLoop();
+    }
+
+    initGrid() {
+        this.grid = [];
+        for (let y = 0; y < this.gridHeight; y++) {
+            this.grid[y] = [];
+            for (let x = 0; x < this.gridWidth; x++) {
+                this.grid[y][x] = 0; // 0 = empty
+            }
+        }
+        
+        // Add some initial random blocks at the bottom
+        for (let y = this.gridHeight - 4; y < this.gridHeight; y++) {
+            for (let x = 0; x < this.gridWidth; x++) {
+                if (Math.random() < 0.7) {
+                    this.grid[y][x] = Math.floor(Math.random() * this.blockTypes.length) + 1;
+                }
+            }
+        }
     }
 
     setupEventListeners() {
         document.addEventListener('keydown', (e) => {
             this.keys[e.code] = true;
             
+            if (this.gameState === 'title' && e.code === 'Space') {
+                this.start();
+                e.preventDefault();
+                return;
+            }
+            
             if (this.gameState === 'playing') {
                 switch(e.code) {
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        this.moveFrame(-1);
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        this.moveFrame(1);
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        this.switchFrame(-1);
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        this.switchFrame(1);
+                        break;
                     case 'Space':
                         e.preventDefault();
-                        this.fireLaser();
-                        break;
-                    case 'KeyQ':
-                        this.changeQuantumState('spin-up');
-                        break;
-                    case 'KeyW':
-                        this.changeQuantumState('spin-down');
-                        break;
-                    case 'KeyE':
-                        this.changeQuantumState('superposition');
-                        break;
-                    case 'KeyR':
-                        this.changeQuantumState('entangled');
-                        break;
-                    case 'KeyF':
-                        this.createQuantumField();
+                        this.swapBlocks();
                         break;
                 }
             }
@@ -87,48 +109,41 @@ class QuantumAttack {
             this.keys[e.code] = false;
         });
 
-        // Touch controls for mobile/iPad
+        // Touch controls
         this.setupTouchControls();
     }
 
     setupTouchControls() {
-        // Touch/swipe handling for player movement
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let isTouching = false;
-
+        // Canvas touch handling
         this.canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
+            if (this.gameState === 'title') {
+                this.start();
+                return;
+            }
+            
             if (this.gameState !== 'playing') return;
             
             const touch = e.touches[0];
             const rect = this.canvas.getBoundingClientRect();
-            touchStartX = touch.clientX - rect.left;
-            touchStartY = touch.clientY - rect.top;
-            isTouching = true;
+            const x = (touch.clientX - rect.left) * (this.canvas.width / rect.width);
+            const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
             
-            // Fire laser on tap
-            this.fireLaser();
-        }, { passive: false });
-
-        this.canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (this.gameState !== 'playing' || !isTouching) return;
+            // Determine action based on touch position
+            const frameX = this.framePosition * this.blockSize + 50;
+            const frameY = 100;
             
-            const touch = e.touches[0];
-            const rect = this.canvas.getBoundingClientRect();
-            const currentX = touch.clientX - rect.left;
-            const currentY = touch.clientY - rect.top;
-            
-            // Move player based on touch position
-            const canvasX = currentX * (this.canvas.width / rect.width);
-            this.player.x = Math.max(0, Math.min(this.canvas.width - this.player.width, canvasX - this.player.width / 2));
-            
-        }, { passive: false });
-
-        this.canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            isTouching = false;
+            if (x >= frameX && x <= frameX + this.blockSize * 2 && 
+                y >= frameY && y <= frameY + this.blockSize * 2) {
+                // Touched the frame area - swap blocks
+                this.swapBlocks();
+            } else if (x < this.canvas.width / 2) {
+                // Left side - move left
+                this.moveFrame(-1);
+            } else {
+                // Right side - move right
+                this.moveFrame(1);
+            }
         }, { passive: false });
 
         // Virtual button handlers
@@ -136,34 +151,26 @@ class QuantumAttack {
     }
 
     setupVirtualButtons() {
-        // Add event listeners for virtual buttons when they're created
         const addButtonListener = (id, action) => {
             const button = document.getElementById(id);
             if (button) {
-                button.addEventListener('touchstart', (e) => {
+                const handler = (e) => {
                     e.preventDefault();
                     if (this.gameState === 'playing') {
                         action();
                     }
-                }, { passive: false });
+                };
                 
-                button.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (this.gameState === 'playing') {
-                        action();
-                    }
-                });
+                button.addEventListener('touchstart', handler, { passive: false });
+                button.addEventListener('click', handler);
             }
         };
 
-        // Wait for DOM to be ready and add listeners
         setTimeout(() => {
-            addButtonListener('quantum-fire-btn', () => this.fireLaser());
-            addButtonListener('quantum-field-btn', () => this.createQuantumField());
-            addButtonListener('quantum-state-up', () => this.changeQuantumState('spin-up'));
-            addButtonListener('quantum-state-down', () => this.changeQuantumState('spin-down'));
-            addButtonListener('quantum-state-super', () => this.changeQuantumState('superposition'));
-            addButtonListener('quantum-state-entangled', () => this.changeQuantumState('entangled'));
+            addButtonListener('quantum-move-left', () => this.moveFrame(-1));
+            addButtonListener('quantum-move-right', () => this.moveFrame(1));
+            addButtonListener('quantum-switch-frame', () => this.switchFrame(1));
+            addButtonListener('quantum-swap-blocks', () => this.swapBlocks());
         }, 100);
     }
 
@@ -172,17 +179,11 @@ class QuantumAttack {
         this.gameRunning = true;
         this.score = 0;
         this.level = 1;
-        this.lives = 3;
-        this.particles = [];
-        this.lasers = [];
-        this.quantumFields = [];
-        this.powerUps = [];
-        this.spawnTimer = 0;
-        this.fieldTimer = 0;
-        this.player.x = this.canvas.width / 2;
-        this.player.y = this.canvas.height - 50;
-        this.player.energy = 100;
-        this.playerState = 'superposition';
+        this.lines = 0;
+        this.framePosition = 3;
+        this.activeFrame = 0;
+        this.dropTimer = 0;
+        this.initGrid();
         this.updateUI();
     }
 
@@ -206,244 +207,163 @@ class QuantumAttack {
         this.updateUI();
     }
 
-    changeQuantumState(newState) {
-        if (this.player.energy >= 10) {
-            this.playerState = newState;
-            this.player.state = newState;
-            this.player.energy -= 10;
-        }
+    moveFrame(direction) {
+        this.framePosition = Math.max(0, Math.min(this.gridWidth - 2, this.framePosition + direction));
     }
 
-    createQuantumField() {
-        if (this.player.energy >= 30 && this.quantumFields.length < 3) {
-            this.quantumFields.push({
-                x: this.player.x,
-                y: this.player.y - 50,
-                radius: 0,
-                maxRadius: 80,
-                duration: this.settings.fieldDuration,
-                type: this.playerState,
-                alpha: 0.7
-            });
-            this.player.energy -= 30;
-        }
+    switchFrame(direction) {
+        this.activeFrame = this.activeFrame === 0 ? 1 : 0;
     }
 
-    fireLaser() {
-        if (this.player.energy >= 5) {
-            this.lasers.push({
-                x: this.player.x,
-                y: this.player.y,
-                width: 4,
-                height: 15,
-                speed: this.settings.laserSpeed,
-                state: this.playerState
-            });
-            this.player.energy -= 5;
-        }
-    }
-
-    spawnParticle() {
-        const states = this.quantumStates;
-        const state = states[Math.floor(Math.random() * states.length)];
+    swapBlocks() {
+        const x = this.framePosition;
+        const y = this.getFrameY();
         
-        this.particles.push({
-            x: Math.random() * (this.canvas.width - 20),
-            y: -20,
-            width: 15,
-            height: 15,
-            speed: this.settings.particleSpeed + Math.random() * 2,
-            state: state,
-            health: state === 'entangled' ? 3 : 1,
-            oscillation: Math.random() * Math.PI * 2
-        });
+        if (y >= 0 && y + 1 < this.gridHeight) {
+            // Swap the two blocks horizontally
+            const temp = this.grid[y][x];
+            this.grid[y][x] = this.grid[y][x + 1];
+            this.grid[y][x + 1] = temp;
+            
+            // Also swap the blocks below if activeFrame is 1
+            if (this.activeFrame === 1 && y + 1 < this.gridHeight) {
+                const temp2 = this.grid[y + 1][x];
+                this.grid[y + 1][x] = this.grid[y + 1][x + 1];
+                this.grid[y + 1][x + 1] = temp2;
+            }
+            
+            // Check for matches after swap
+            setTimeout(() => this.checkMatches(), 100);
+        }
     }
 
-    spawnPowerUp() {
-        if (Math.random() < 0.3) {
-            this.powerUps.push({
-                x: Math.random() * (this.canvas.width - 20),
-                y: -20,
-                width: 12,
-                height: 12,
-                speed: 1,
-                type: Math.random() < 0.5 ? 'energy' : 'life'
+    getFrameY() {
+        // Find the topmost non-empty row in the frame columns
+        for (let y = 0; y < this.gridHeight - 1; y++) {
+            if (this.grid[y][this.framePosition] !== 0 || this.grid[y][this.framePosition + 1] !== 0) {
+                return Math.max(0, y - (this.activeFrame === 0 ? 0 : 1));
+            }
+        }
+        return this.gridHeight - 2;
+    }
+
+    checkMatches() {
+        let hasMatches = false;
+        const toRemove = [];
+        
+        // Check vertical matches (3 or more in a column)
+        for (let x = 0; x < this.gridWidth; x++) {
+            let count = 1;
+            let currentType = this.grid[this.gridHeight - 1][x];
+            
+            for (let y = this.gridHeight - 2; y >= 0; y--) {
+                if (this.grid[y][x] === currentType && currentType !== 0) {
+                    count++;
+                } else {
+                    if (count >= 3 && currentType !== 0) {
+                        // Mark blocks for removal
+                        for (let i = 0; i < count; i++) {
+                            toRemove.push({x: x, y: y + 1 + i});
+                        }
+                        hasMatches = true;
+                    }
+                    count = 1;
+                    currentType = this.grid[y][x];
+                }
+            }
+            
+            // Check the last sequence
+            if (count >= 3 && currentType !== 0) {
+                for (let i = 0; i < count; i++) {
+                    toRemove.push({x: x, y: i});
+                }
+                hasMatches = true;
+            }
+        }
+        
+        // Remove matched blocks
+        if (hasMatches) {
+            toRemove.forEach(pos => {
+                this.grid[pos.y][pos.x] = 0;
             });
+            
+            this.score += toRemove.length * 100;
+            this.lines += Math.floor(toRemove.length / 3);
+            
+            // Drop blocks down
+            setTimeout(() => {
+                this.dropBlocks();
+                // Check for chain reactions
+                setTimeout(() => this.checkMatches(), 200);
+            }, 300);
+        }
+    }
+
+    dropBlocks() {
+        for (let x = 0; x < this.gridWidth; x++) {
+            // Collect non-empty blocks from bottom to top
+            const column = [];
+            for (let y = this.gridHeight - 1; y >= 0; y--) {
+                if (this.grid[y][x] !== 0) {
+                    column.push(this.grid[y][x]);
+                }
+            }
+            
+            // Clear the column
+            for (let y = 0; y < this.gridHeight; y++) {
+                this.grid[y][x] = 0;
+            }
+            
+            // Place blocks from bottom
+            for (let i = 0; i < column.length; i++) {
+                this.grid[this.gridHeight - 1 - i][x] = column[i];
+            }
+        }
+    }
+
+    addNewRow() {
+        // Check if game over (top row has blocks)
+        for (let x = 0; x < this.gridWidth; x++) {
+            if (this.grid[0][x] !== 0) {
+                this.stop();
+                return;
+            }
+        }
+        
+        // Shift all rows up
+        for (let y = 0; y < this.gridHeight - 1; y++) {
+            for (let x = 0; x < this.gridWidth; x++) {
+                this.grid[y][x] = this.grid[y + 1][x];
+            }
+        }
+        
+        // Add new bottom row
+        for (let x = 0; x < this.gridWidth; x++) {
+            if (Math.random() < 0.8) {
+                this.grid[this.gridHeight - 1][x] = Math.floor(Math.random() * this.blockTypes.length) + 1;
+            } else {
+                this.grid[this.gridHeight - 1][x] = 0;
+            }
         }
     }
 
     update(deltaTime) {
         if (!this.gameRunning) return;
 
-        // Update player movement
-        if (this.keys['ArrowLeft'] || this.keys['KeyA']) {
-            this.player.x = Math.max(0, this.player.x - this.settings.playerSpeed);
-        }
-        if (this.keys['ArrowRight'] || this.keys['KeyD']) {
-            this.player.x = Math.min(this.canvas.width - this.player.width, this.player.x + this.settings.playerSpeed);
-        }
-
-        // Regenerate energy slowly
-        if (this.player.energy < 100) {
-            this.player.energy += deltaTime * 0.02;
-            this.player.energy = Math.min(100, this.player.energy);
-        }
-
-        // Spawn particles
-        this.spawnTimer += deltaTime;
-        if (this.spawnTimer >= this.settings.spawnRate) {
-            this.spawnParticle();
-            this.spawnTimer = 0;
+        // Add new rows periodically
+        this.dropTimer += deltaTime;
+        if (this.dropTimer >= this.dropInterval) {
+            this.addNewRow();
+            this.dropTimer = 0;
             
-            // Occasionally spawn power-ups
-            if (Math.random() < 0.2) {
-                this.spawnPowerUp();
+            // Increase speed with level
+            if (this.lines >= this.level * 10) {
+                this.level++;
+                this.dropInterval = Math.max(500, this.dropInterval - 50);
             }
-        }
-
-        // Update particles
-        this.particles = this.particles.filter(particle => {
-            particle.y += particle.speed;
-            particle.oscillation += deltaTime * 0.003;
-            
-            // Quantum superposition effect
-            if (particle.state === 'superposition') {
-                particle.x += Math.sin(particle.oscillation) * 0.5;
-            }
-            
-            // Remove particles that are off screen
-            if (particle.y > this.canvas.height + 20) {
-                this.lives--;
-                if (this.lives <= 0) {
-                    this.stop();
-                }
-                return false;
-            }
-            
-            return true;
-        });
-
-        // Update lasers
-        this.lasers = this.lasers.filter(laser => {
-            laser.y -= laser.speed;
-            return laser.y > -laser.height;
-        });
-
-        // Update quantum fields
-        this.quantumFields = this.quantumFields.filter(field => {
-            field.duration -= deltaTime;
-            field.radius = Math.min(field.maxRadius, field.radius + deltaTime * 0.1);
-            field.alpha = Math.max(0, field.duration / this.settings.fieldDuration * 0.7);
-            return field.duration > 0;
-        });
-
-        // Update power-ups
-        this.powerUps = this.powerUps.filter(powerUp => {
-            powerUp.y += powerUp.speed;
-            return powerUp.y < this.canvas.height + 20;
-        });
-
-        // Check collisions
-        this.checkCollisions();
-
-        // Level progression
-        if (this.score > this.level * 1000) {
-            this.level++;
-            this.settings.particleSpeed += 0.5;
-            this.settings.spawnRate = Math.max(1000, this.settings.spawnRate - 100);
         }
 
         this.updateUI();
-    }
-
-    checkCollisions() {
-        // Laser vs Particles
-        for (let i = this.lasers.length - 1; i >= 0; i--) {
-            const laser = this.lasers[i];
-            
-            for (let j = this.particles.length - 1; j >= 0; j--) {
-                const particle = this.particles[j];
-                
-                if (this.isColliding(laser, particle)) {
-                    // Quantum mechanics: matching states do double damage
-                    let damage = 1;
-                    if (laser.state === particle.state) {
-                        damage = 2;
-                        this.score += 50; // Bonus for quantum resonance
-                    }
-                    
-                    particle.health -= damage;
-                    this.score += 10;
-                    
-                    if (particle.health <= 0) {
-                        this.particles.splice(j, 1);
-                        this.score += 20;
-                    }
-                    
-                    this.lasers.splice(i, 1);
-                    break;
-                }
-            }
-        }
-
-        // Quantum Field vs Particles
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            const particle = this.particles[i];
-            
-            for (const field of this.quantumFields) {
-                const dx = particle.x - field.x;
-                const dy = particle.y - field.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance < field.radius) {
-                    if (field.type === particle.state || field.type === 'superposition') {
-                        this.particles.splice(i, 1);
-                        this.score += 30;
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Player vs PowerUps
-        for (let i = this.powerUps.length - 1; i >= 0; i--) {
-            const powerUp = this.powerUps[i];
-            
-            if (this.isColliding(this.player, powerUp)) {
-                if (powerUp.type === 'energy') {
-                    this.player.energy = Math.min(100, this.player.energy + 30);
-                } else if (powerUp.type === 'life') {
-                    this.lives = Math.min(5, this.lives + 1);
-                }
-                this.powerUps.splice(i, 1);
-            }
-        }
-
-        // Player vs Particles (collision damage)
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            const particle = this.particles[i];
-            
-            if (this.isColliding(this.player, particle)) {
-                // Quantum state matching reduces damage
-                if (this.playerState === particle.state) {
-                    this.score += 10; // Bonus for quantum harmony
-                } else {
-                    this.lives--;
-                    if (this.lives <= 0) {
-                        this.stop();
-                        return;
-                    }
-                }
-                this.particles.splice(i, 1);
-            }
-        }
-    }
-
-    isColliding(obj1, obj2) {
-        return obj1.x < obj2.x + obj2.width &&
-               obj1.x + obj1.width > obj2.x &&
-               obj1.y < obj2.y + obj2.height &&
-               obj1.y + obj1.height > obj2.y;
     }
 
     render() {
@@ -451,8 +371,8 @@ class QuantumAttack {
         this.ctx.fillStyle = '#000011';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        if (this.gameState === 'menu') {
-            this.renderMenu();
+        if (this.gameState === 'title') {
+            this.renderTitle();
             return;
         }
 
@@ -461,104 +381,102 @@ class QuantumAttack {
             return;
         }
 
-        // Draw quantum fields
-        for (const field of this.quantumFields) {
-            this.ctx.save();
-            this.ctx.globalAlpha = field.alpha;
-            this.ctx.strokeStyle = this.getStateColor(field.type);
-            this.ctx.lineWidth = 3;
-            this.ctx.setLineDash([5, 5]);
-            this.ctx.beginPath();
-            this.ctx.arc(field.x, field.y, field.radius, 0, Math.PI * 2);
-            this.ctx.stroke();
-            this.ctx.restore();
-        }
-
-        // Draw particles
-        for (const particle of this.particles) {
-            this.ctx.fillStyle = this.getStateColor(particle.state);
-            
-            if (particle.state === 'superposition') {
-                // Flickering effect for superposition
-                this.ctx.globalAlpha = 0.5 + 0.5 * Math.sin(particle.oscillation * 10);
-            } else {
-                this.ctx.globalAlpha = 1;
-            }
-            
-            this.ctx.fillRect(particle.x, particle.y, particle.width, particle.height);
-            
-            // Draw quantum state symbol
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.font = '10px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(this.getStateSymbol(particle.state), 
-                particle.x + particle.width/2, particle.y + particle.height/2 + 3);
-        }
-
-        // Draw lasers
-        this.ctx.globalAlpha = 1;
-        for (const laser of this.lasers) {
-            this.ctx.fillStyle = this.getStateColor(laser.state);
-            this.ctx.fillRect(laser.x, laser.y, laser.width, laser.height);
-        }
-
-        // Draw power-ups
-        for (const powerUp of this.powerUps) {
-            this.ctx.fillStyle = powerUp.type === 'energy' ? '#00ff00' : '#ff00ff';
-            this.ctx.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
-            
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.font = '8px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(powerUp.type === 'energy' ? 'E' : '+', 
-                powerUp.x + powerUp.width/2, powerUp.y + powerUp.height/2 + 2);
-        }
-
-        // Draw player
-        this.ctx.fillStyle = this.getStateColor(this.playerState);
-        this.ctx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+        // Draw grid
+        const offsetX = 50;
+        const offsetY = 50;
         
-        // Player state indicator
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.font = '12px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText(this.getStateSymbol(this.playerState), 
-            this.player.x + this.player.width/2, this.player.y + this.player.height/2 + 4);
+        // Draw blocks
+        for (let y = 0; y < this.gridHeight; y++) {
+            for (let x = 0; x < this.gridWidth; x++) {
+                const blockType = this.grid[y][x];
+                if (blockType > 0) {
+                    const block = this.blockTypes[blockType - 1];
+                    this.ctx.fillStyle = block.color;
+                    this.ctx.fillRect(
+                        offsetX + x * this.blockSize,
+                        offsetY + y * this.blockSize,
+                        this.blockSize - 1,
+                        this.blockSize - 1
+                    );
+                    
+                    // Draw symbol
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.font = '16px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(
+                        block.symbol,
+                        offsetX + x * this.blockSize + this.blockSize / 2,
+                        offsetY + y * this.blockSize + this.blockSize / 2 + 6
+                    );
+                }
+            }
+        }
+        
+        // Draw grid lines
+        this.ctx.strokeStyle = '#333333';
+        this.ctx.lineWidth = 1;
+        for (let x = 0; x <= this.gridWidth; x++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(offsetX + x * this.blockSize, offsetY);
+            this.ctx.lineTo(offsetX + x * this.blockSize, offsetY + this.gridHeight * this.blockSize);
+            this.ctx.stroke();
+        }
+        for (let y = 0; y <= this.gridHeight; y++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(offsetX, offsetY + y * this.blockSize);
+            this.ctx.lineTo(offsetX + this.gridWidth * this.blockSize, offsetY + y * this.blockSize);
+            this.ctx.stroke();
+        }
 
-        // Energy bar
-        this.ctx.fillStyle = '#333';
-        this.ctx.fillRect(this.player.x - 5, this.player.y - 15, 40, 8);
-        this.ctx.fillStyle = '#00ff00';
-        this.ctx.fillRect(this.player.x - 5, this.player.y - 15, 40 * (this.player.energy / 100), 8);
+        // Draw frame
+        const frameX = offsetX + this.framePosition * this.blockSize;
+        const frameY = offsetY + this.getFrameY() * this.blockSize;
+        
+        this.ctx.strokeStyle = this.activeFrame === 0 ? '#ffff00' : '#ff00ff';
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeRect(frameX, frameY, this.blockSize * 2, this.blockSize * 2);
+        
+        // Highlight active row
+        if (this.activeFrame === 1) {
+            this.ctx.strokeStyle = '#ff00ff';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(frameX, frameY + this.blockSize, this.blockSize * 2, this.blockSize);
+        }
 
         if (this.gameState === 'paused') {
             this.renderPause();
         }
     }
 
-    renderMenu() {
+    renderTitle() {
         this.ctx.fillStyle = '#ffffff';
-        this.ctx.font = '24px Arial';
+        this.ctx.font = 'bold 36px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('Quantum Attack', this.canvas.width/2, this.canvas.height/2 - 50);
+        this.ctx.fillText('QUANTATTACK', this.canvas.width/2, this.canvas.height/2 - 60);
+        
+        this.ctx.font = '18px Arial';
+        this.ctx.fillText('Block Puzzle Game', this.canvas.width/2, this.canvas.height/2 - 20);
         
         this.ctx.font = '16px Arial';
-        this.ctx.fillText('Controls:', this.canvas.width/2, this.canvas.height/2 - 10);
-        this.ctx.font = '12px Arial';
-        this.ctx.fillText('Arrow Keys: Move', this.canvas.width/2, this.canvas.height/2 + 10);
-        this.ctx.fillText('Space: Fire Laser', this.canvas.width/2, this.canvas.height/2 + 25);
-        this.ctx.fillText('Q/W/E/R: Change Quantum State', this.canvas.width/2, this.canvas.height/2 + 40);
-        this.ctx.fillText('F: Create Quantum Field', this.canvas.width/2, this.canvas.height/2 + 55);
+        this.ctx.fillText('Press SPACE or TAP to Start', this.canvas.width/2, this.canvas.height/2 + 20);
+        
+        this.ctx.font = '14px Arial';
+        this.ctx.fillText('Move frames, swap blocks, clear vertical lines!', this.canvas.width/2, this.canvas.height/2 + 50);
     }
 
     renderGameOver() {
+        // Semi-transparent overlay
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
         this.ctx.fillStyle = '#ffffff';
         this.ctx.font = '24px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('Game Over', this.canvas.width/2, this.canvas.height/2 - 30);
+        this.ctx.fillText('GAME OVER', this.canvas.width/2, this.canvas.height/2 - 30);
         this.ctx.font = '16px Arial';
         this.ctx.fillText(`Score: ${this.score}`, this.canvas.width/2, this.canvas.height/2);
-        this.ctx.fillText(`High Score: ${this.highScore}`, this.canvas.width/2, this.canvas.height/2 + 20);
+        this.ctx.fillText(`Lines: ${this.lines}`, this.canvas.width/2, this.canvas.height/2 + 20);
+        this.ctx.fillText(`High Score: ${this.highScore}`, this.canvas.width/2, this.canvas.height/2 + 40);
     }
 
     renderPause() {
@@ -568,26 +486,6 @@ class QuantumAttack {
         this.ctx.font = '24px Arial';
         this.ctx.textAlign = 'center';
         this.ctx.fillText('PAUSED', this.canvas.width/2, this.canvas.height/2);
-    }
-
-    getStateColor(state) {
-        switch(state) {
-            case 'spin-up': return '#ff0000';
-            case 'spin-down': return '#0000ff';
-            case 'superposition': return '#ffff00';
-            case 'entangled': return '#ff00ff';
-            default: return '#ffffff';
-        }
-    }
-
-    getStateSymbol(state) {
-        switch(state) {
-            case 'spin-up': return '↑';
-            case 'spin-down': return '↓';
-            case 'superposition': return '⟡';
-            case 'entangled': return '∞';
-            default: return '?';
-        }
     }
 
     gameLoop(currentTime = 0) {
@@ -607,7 +505,7 @@ class QuantumAttack {
         const statusElement = document.getElementById('quantum-status');
         if (statusElement) {
             if (this.gameState === 'playing') {
-                statusElement.textContent = `${labels.score}: ${this.score} | ${this.getLevelText()}: ${this.level} | ${this.getLivesText()}: ${this.lives}`;
+                statusElement.textContent = `${labels.score}: ${this.score} | ${this.getLevelText()}: ${this.level} | ${this.getLinesText()}: ${this.lines}`;
             } else if (this.gameState === 'gameOver') {
                 statusElement.textContent = `${labels.gameOver} ${labels.score}: ${this.score}`;
             }
@@ -628,12 +526,12 @@ class QuantumAttack {
         }
     }
 
-    getLivesText() {
+    getLinesText() {
         const lang = window.currentLang || 'zh';
         switch(lang) {
-            case 'en': return 'Lives';
-            case 'ja': return 'ライフ';
-            default: return '生命';
+            case 'en': return 'Lines';
+            case 'ja': return 'ライン';
+            default: return '行数';
         }
     }
 
@@ -641,8 +539,6 @@ class QuantumAttack {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
         }
-        document.removeEventListener('keydown', this.handleKeyDown);
-        document.removeEventListener('keyup', this.handleKeyUp);
     }
 }
 
