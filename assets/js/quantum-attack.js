@@ -23,13 +23,14 @@ class QuantumAttack {
         this.frameY = 10; // vertical position (0-14)
         this.activeFrame = 0; // 0 = left frame, 1 = right frame
         
-        // Block types with quantum states (lighter colors)
+        // Block types with quantum logic gates (lighter colors)
         this.blockTypes = [
-            { color: '#ff8888', symbol: '●', value: 1, quantumState: '|↑⟩' }, // Light Red - Spin Up
-            { color: '#8888ff', symbol: '■', value: 2, quantumState: '|↓⟩' }, // Light Blue - Spin Down
-            { color: '#ffff88', symbol: '◆', value: 3, quantumState: '|+⟩' }, // Light Yellow - Superposition
-            { color: '#ff88ff', symbol: '▲', value: 4, quantumState: '|∞⟩' }, // Light Magenta - Entangled
-            { color: '#88ff88', symbol: '★', value: 5, quantumState: '|0⟩' }  // Light Green - Ground State
+            { color: '#ff8888', symbol: '●', value: 1, quantumGate: '＋' }, // Light Red - CNOT Gate
+            { color: '#8888ff', symbol: '■', value: 2, quantumGate: 'H' }, // Light Blue - Hadamard Gate
+            { color: '#ffff88', symbol: '◆', value: 3, quantumGate: 'S' }, // Light Yellow - S Gate
+            { color: '#ff88ff', symbol: '▲', value: 4, quantumGate: 'T' }, // Light Magenta - T Gate
+            { color: '#88ff88', symbol: '★', value: 5, quantumGate: 'Z' }, // Light Green - Pauli-Z Gate
+            { color: '#ffaa88', symbol: '♦', value: 6, quantumGate: 'Y' }  // Light Orange - Pauli-Y Gate
         ];
         
         // Game timing
@@ -60,7 +61,7 @@ class QuantumAttack {
             }
         }
         
-        // Add some initial random blocks at the bottom
+        // Add some initial random quantum gate blocks at the bottom
         for (let y = this.gridHeight - 4; y < this.gridHeight; y++) {
             for (let x = 0; x < this.gridWidth; x++) {
                 if (Math.random() < 0.7) {
@@ -405,14 +406,14 @@ class QuantumAttack {
                         this.blockSize - 1
                     );
                     
-                    // Draw quantum state symbol
+                    // Draw quantum gate symbol
                     this.ctx.fillStyle = '#000000';
-                    this.ctx.font = 'bold 10px Arial';
+                    this.ctx.font = 'bold 12px Arial';
                     this.ctx.textAlign = 'center';
                     this.ctx.fillText(
-                        block.quantumState,
+                        block.quantumGate,
                         offsetX + x * this.blockSize + this.blockSize / 2,
-                        offsetY + y * this.blockSize + this.blockSize / 2 + 3
+                        offsetY + y * this.blockSize + this.blockSize / 2 + 4
                     );
                 }
             }
@@ -484,14 +485,14 @@ class QuantumAttack {
         this.ctx.fillText('QUANTATTACK', this.canvas.width/2, this.canvas.height/2 - 60);
         
         this.ctx.font = '18px Arial';
-        this.ctx.fillText('Block Puzzle Game', this.canvas.width/2, this.canvas.height/2 - 20);
+        this.ctx.fillText('Quantum Gate Puzzle', this.canvas.width/2, this.canvas.height/2 - 20);
         
         this.ctx.font = '16px Arial';
         this.ctx.fillText('Press SPACE or TAP to Start', this.canvas.width/2, this.canvas.height/2 + 20);
         
         this.ctx.font = '14px Arial';
-        this.ctx.fillText('Move two-square frame, swap adjacent blocks!', this.canvas.width/2, this.canvas.height/2 + 50);
-        this.ctx.fillText('Arrow keys to move, A to switch, Space to swap', this.canvas.width/2, this.canvas.height/2 + 70);
+        this.ctx.fillText('Arrange quantum gates, clear vertical lines!', this.canvas.width/2, this.canvas.height/2 + 50);
+        this.ctx.fillText('Gates: ＋ H S T Z Y - Move & swap to match!', this.canvas.width/2, this.canvas.height/2 + 70);
     }
 
     renderGameOver() {
