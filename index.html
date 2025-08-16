@@ -17,6 +17,8 @@
                 <button id="tab-mole" onclick="showGame('mole')">打地鼠</button>
                 <!-- Add Tetris tab -->
                 <button id="tab-tetris" onclick="showGame('tetris')">俄罗斯方块</button>
+                <!-- Add Quantum Attack tab -->
+                <button id="tab-quantum" onclick="showGame('quantum')">量子攻击</button>
             </div>
         </div>
         <div id="game-contents">
@@ -89,6 +91,22 @@
                     ← → 移动，↑ 旋转，↓ 下落，空格 直落，P 暂停，R 重置
                 </div>
             </div>
+            <!-- Quantum Attack Section -->
+            <div id="quantum-section" style="display:none;">
+                <div id="quantum-controls">
+                    <button id="quantum-newgame" onclick="startQuantumAttack()">开始新游戏</button>
+                    <button id="quantum-pause" onclick="pauseQuantumAttack()">暂停/继续</button>
+                    <button id="quantum-reset" onclick="resetQuantumAttack()">重置</button>
+                    <span id="quantum-status"></span>
+                </div>
+                <div id="quantum-info">
+                    <span id="quantum-highscore"></span>
+                </div>
+                <canvas id="quantum-canvas" width="500" height="600" aria-label="Quantum Attack field" role="img"></canvas>
+                <div style="margin-top:8px; font-size: 14px; color:#666;">
+                    ← → 移动，空格 发射，Q/W/E/R 量子状态，F 量子场
+                </div>
+            </div>
         </div>
     </div>
     <script src="assets/js/minesweeper.js"></script>
@@ -102,8 +120,8 @@
         zh: {
             title: '小游戏合集',
             menu: '菜单',
-            tabs: ['扫雷', '贪吃蛇', '飞机大战', '打地鼠', '俄罗斯方块'],
-            newgame: ['开始新游戏', '开始新游戏', '开始新游戏', '开始新游戏', '开始新游戏'],
+            tabs: ['扫雷', '贪吃蛇', '飞机大战', '打地鼠', '俄罗斯方块', '量子攻击'],
+            newgame: ['开始新游戏', '开始新游戏', '开始新游戏', '开始新游戏', '开始新游戏', '开始新游戏'],
             labels: {
                 flags: '旗标',
                 bestTime: '最快时间',
@@ -117,8 +135,8 @@
         en: {
             title: 'Mini Game Collection',
             menu: 'Menu',
-            tabs: ['Minesweeper', 'Snake', 'Plane War', 'Whac-A-Mole', 'Tetris'],
-            newgame: ['New Game', 'New Game', 'New Game', 'New Game', 'New Game'],
+            tabs: ['Minesweeper', 'Snake', 'Plane War', 'Whac-A-Mole', 'Tetris', 'Quantum Attack'],
+            newgame: ['New Game', 'New Game', 'New Game', 'New Game', 'New Game', 'New Game'],
             labels: {
                 flags: 'Flags',
                 bestTime: 'Best Time',
@@ -132,8 +150,8 @@
         ja: {
             title: 'ミニゲームコレクション',
             menu: 'メニュー',
-            tabs: ['マインスイーパー', 'スネーク', 'シューティング', 'モグラたたき', 'テトリス'],
-            newgame: ['新しいゲーム', '新しいゲーム', '新しいゲーム', '新しいゲーム', '新しいゲーム'],
+            tabs: ['マインスイーパー', 'スネーク', 'シューティング', 'モグラたたき', 'テトリス', 'クアンドアタック'],
+            newgame: ['新しいゲーム', '新しいゲーム', '新しいゲーム', '新しいゲーム', '新しいゲーム', '新しいゲーム'],
             labels: {
                 flags: '旗',
                 bestTime: '最速タイム',
@@ -159,16 +177,18 @@
         document.getElementById('tab-plane').textContent = langMap[lang].tabs[2];
         document.getElementById('tab-mole').textContent = langMap[lang].tabs[3];
         document.getElementById('tab-tetris').textContent = langMap[lang].tabs[4];
+        document.getElementById('tab-quantum').textContent = langMap[lang].tabs[5];
         document.getElementById('minesweeper-newgame').textContent = langMap[lang].newgame[0];
         document.getElementById('snake-newgame').textContent = langMap[lang].newgame[1];
         document.getElementById('plane-newgame').textContent = langMap[lang].newgame[2];
         document.getElementById('mole-newgame').textContent = langMap[lang].newgame[3];
         document.getElementById('tetris-newgame').textContent = langMap[lang].newgame[4];
+        document.getElementById('quantum-newgame').textContent = langMap[lang].newgame[5];
         const toggleBtn = document.getElementById('menu-toggle');
         if (toggleBtn) toggleBtn.textContent = '☰ ' + langMap[lang].menu;
         // 语言切换后，刷新标题以匹配当前游戏
         if (currentGame) {
-            const mapIdx = { minesweeper:0, snake:1, plane:2, mole:3, tetris:4 };
+            const mapIdx = { minesweeper:0, snake:1, plane:2, mole:3, tetris:4, quantum:5 };
             document.getElementById('main-title').textContent = langMap[currentLang].tabs[mapIdx[currentGame]];
         }
     }
@@ -180,13 +200,15 @@
         document.getElementById('plane-section').style.display = (game === 'plane') ? '' : 'none';
         document.getElementById('mole-section').style.display = (game === 'mole') ? '' : 'none';
         document.getElementById('tetris-section').style.display = (game === 'tetris') ? '' : 'none';
+        document.getElementById('quantum-section').style.display = (game === 'quantum') ? '' : 'none';
         document.getElementById('tab-minesweeper').classList.toggle('active', game === 'minesweeper');
         document.getElementById('tab-snake').classList.toggle('active', game === 'snake');
         document.getElementById('tab-plane').classList.toggle('active', game === 'plane');
         document.getElementById('tab-mole').classList.toggle('active', game === 'mole');
         document.getElementById('tab-tetris').classList.toggle('active', game === 'tetris');
+        document.getElementById('tab-quantum').classList.toggle('active', game === 'quantum');
         // 标题跟随所选游戏
-        const mapIdx = { minesweeper:0, snake:1, plane:2, mole:3, tetris:4 };
+        const mapIdx = { minesweeper:0, snake:1, plane:2, mole:3, tetris:4, quantum:5 };
         document.getElementById('main-title').textContent = langMap[currentLang].tabs[mapIdx[game]];
         // 小屏切换游戏后自动收起菜单
         if (window.innerWidth <= 900) {
@@ -248,5 +270,7 @@
     </script>
     <!-- Tetris script -->
     <script src="assets/js/tetris.js?v=20250813b"></script>
+    <!-- Quantum Attack script -->
+    <script src="assets/js/quantum-attack.js"></script>
 </body>
 </html> 
