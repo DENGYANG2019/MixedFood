@@ -23,13 +23,13 @@ class QuantumAttack {
         this.frameY = 10; // vertical position (0-14)
         this.activeFrame = 0; // 0 = left frame, 1 = right frame
         
-        // Block types
+        // Block types with quantum states
         this.blockTypes = [
-            { color: '#ff0000', symbol: '●', value: 1 }, // Red
-            { color: '#0000ff', symbol: '■', value: 2 }, // Blue
-            { color: '#ffff00', symbol: '◆', value: 3 }, // Yellow
-            { color: '#ff00ff', symbol: '▲', value: 4 }, // Magenta
-            { color: '#00ff00', symbol: '★', value: 5 }  // Green
+            { color: '#ff0000', symbol: '●', value: 1, quantumState: '|↑⟩' }, // Red - Spin Up
+            { color: '#0000ff', symbol: '■', value: 2, quantumState: '|↓⟩' }, // Blue - Spin Down
+            { color: '#ffff00', symbol: '◆', value: 3, quantumState: '|+⟩' }, // Yellow - Superposition
+            { color: '#ff00ff', symbol: '▲', value: 4, quantumState: '|∞⟩' }, // Magenta - Entangled
+            { color: '#00ff00', symbol: '★', value: 5, quantumState: '|0⟩' }  // Green - Ground State
         ];
         
         // Game timing
@@ -141,7 +141,7 @@ class QuantumAttack {
             const framePixelY = offsetY + this.frameY * this.blockSize;
             
             if (x >= framePixelX && x <= framePixelX + this.blockSize * 2 && 
-                y >= framePixelY && y <= framePixelY + this.blockSize * 2) {
+                y >= framePixelY && y <= framePixelY + this.blockSize) {
                 // Touched the frame area - swap blocks
                 this.swapBlocks();
             } else if (x < this.canvas.width / 3) {
@@ -236,21 +236,15 @@ class QuantumAttack {
     }
 
     swapBlocks() {
-        const x = this.frameX;
+        const leftX = this.frameX;
+        const rightX = this.frameX + 1;
         const y = this.frameY;
         
-        if (x >= 0 && x + 1 < this.gridWidth && y >= 0 && y + 1 < this.gridHeight) {
-            if (this.activeFrame === 0) {
-                // Left frame: swap horizontally (left-right)
-                const temp = this.grid[y][x];
-                this.grid[y][x] = this.grid[y][x + 1];
-                this.grid[y][x + 1] = temp;
-            } else {
-                // Right frame: swap vertically (up-down)
-                const temp = this.grid[y][x];
-                this.grid[y][x] = this.grid[y + 1][x];
-                this.grid[y + 1][x] = temp;
-            }
+        // Always swap the two adjacent blocks horizontally (left square with right square)
+        if (leftX >= 0 && rightX < this.gridWidth && y >= 0 && y < this.gridHeight) {
+            const temp = this.grid[y][leftX];
+            this.grid[y][leftX] = this.grid[y][rightX];
+            this.grid[y][rightX] = temp;
             
             // Check for matches after swap
             setTimeout(() => this.checkMatches(), 100);
@@ -411,14 +405,14 @@ class QuantumAttack {
                         this.blockSize - 1
                     );
                     
-                    // Draw symbol
+                    // Draw quantum state symbol
                     this.ctx.fillStyle = '#ffffff';
-                    this.ctx.font = '16px Arial';
+                    this.ctx.font = 'bold 10px Arial';
                     this.ctx.textAlign = 'center';
                     this.ctx.fillText(
-                        block.symbol,
+                        block.quantumState,
                         offsetX + x * this.blockSize + this.blockSize / 2,
-                        offsetY + y * this.blockSize + this.blockSize / 2 + 6
+                        offsetY + y * this.blockSize + this.blockSize / 2 + 3
                     );
                 }
             }
@@ -440,34 +434,43 @@ class QuantumAttack {
             this.ctx.stroke();
         }
 
-        // Draw frames
+        // Draw frames - two adjacent squares
         const framePixelX = offsetX + this.frameX * this.blockSize;
         const framePixelY = offsetY + this.frameY * this.blockSize;
         
-        // Draw left frame (horizontal swap)
+        // Draw left square frame
         this.ctx.strokeStyle = this.activeFrame === 0 ? '#ffff00' : '#666666';
         this.ctx.lineWidth = this.activeFrame === 0 ? 4 : 2;
-        this.ctx.strokeRect(framePixelX, framePixelY, this.blockSize * 2, this.blockSize);
+        this.ctx.strokeRect(framePixelX, framePixelY, this.blockSize, this.blockSize);
         
-        // Draw right frame (vertical swap)  
+        // Draw right square frame (adjacent to left)
         this.ctx.strokeStyle = this.activeFrame === 1 ? '#ff00ff' : '#666666';
         this.ctx.lineWidth = this.activeFrame === 1 ? 4 : 2;
-        this.ctx.strokeRect(framePixelX + this.blockSize, framePixelY, this.blockSize, this.blockSize * 2);
+        this.ctx.strokeRect(framePixelX + this.blockSize, framePixelY, this.blockSize, this.blockSize);
+        
+        // Draw connecting line between frames
+        this.ctx.strokeStyle = '#ffffff';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(framePixelX + this.blockSize, framePixelY + this.blockSize / 4);
+        this.ctx.lineTo(framePixelX + this.blockSize, framePixelY + this.blockSize * 3 / 4);
+        this.ctx.stroke();
         
         // Draw frame indicators
         this.ctx.fillStyle = '#ffffff';
-        this.ctx.font = '12px Arial';
+        this.ctx.font = '10px Arial';
         this.ctx.textAlign = 'center';
         
-        // Left frame indicator (horizontal arrows)
+        // Active frame indicator
         if (this.activeFrame === 0) {
-            this.ctx.fillText('←→', framePixelX + this.blockSize, framePixelY - 5);
+            this.ctx.fillText('L', framePixelX + this.blockSize / 2, framePixelY - 5);
+        } else {
+            this.ctx.fillText('R', framePixelX + this.blockSize * 1.5, framePixelY - 5);
         }
         
-        // Right frame indicator (vertical arrows)
-        if (this.activeFrame === 1) {
-            this.ctx.fillText('↑↓', framePixelX + this.blockSize * 1.5, framePixelY - 5);
-        }
+        // Swap arrow indicator
+        this.ctx.font = '14px Arial';
+        this.ctx.fillText('⇄', framePixelX + this.blockSize, framePixelY - 8);
 
         if (this.gameState === 'paused') {
             this.renderPause();
@@ -487,8 +490,8 @@ class QuantumAttack {
         this.ctx.fillText('Press SPACE or TAP to Start', this.canvas.width/2, this.canvas.height/2 + 20);
         
         this.ctx.font = '14px Arial';
-        this.ctx.fillText('Move frames up/down/left/right, swap blocks!', this.canvas.width/2, this.canvas.height/2 + 50);
-        this.ctx.fillText('A key to switch frames, Space to swap', this.canvas.width/2, this.canvas.height/2 + 70);
+        this.ctx.fillText('Move two-square frame, swap adjacent blocks!', this.canvas.width/2, this.canvas.height/2 + 50);
+        this.ctx.fillText('Arrow keys to move, A to switch, Space to swap', this.canvas.width/2, this.canvas.height/2 + 70);
     }
 
     renderGameOver() {
