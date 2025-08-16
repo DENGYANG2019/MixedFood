@@ -18,9 +18,10 @@ class QuantumAttack {
         this.grid = [];
         this.blockSize = 25;
         
-        // Two frames for block swapping
-        this.framePosition = 3; // horizontal position (0-6)
-        this.activeFrame = 0; // 0 = top frame, 1 = bottom frame
+        // Two frames for block swapping (side by side)
+        this.frameX = 2; // horizontal position (0-6)
+        this.frameY = 10; // vertical position (0-14)
+        this.activeFrame = 0; // 0 = left frame, 1 = right frame
         
         // Block types
         this.blockTypes = [
@@ -83,19 +84,23 @@ class QuantumAttack {
                 switch(e.code) {
                     case 'ArrowLeft':
                         e.preventDefault();
-                        this.moveFrame(-1);
+                        this.moveFrameHorizontal(-1);
                         break;
                     case 'ArrowRight':
                         e.preventDefault();
-                        this.moveFrame(1);
+                        this.moveFrameHorizontal(1);
                         break;
                     case 'ArrowUp':
                         e.preventDefault();
-                        this.switchFrame(-1);
+                        this.moveFrameVertical(-1);
                         break;
                     case 'ArrowDown':
                         e.preventDefault();
-                        this.switchFrame(1);
+                        this.moveFrameVertical(1);
+                        break;
+                    case 'KeyA':
+                        e.preventDefault();
+                        this.switchFrame();
                         break;
                     case 'Space':
                         e.preventDefault();
@@ -130,19 +135,27 @@ class QuantumAttack {
             const y = (touch.clientY - rect.top) * (this.canvas.height / rect.height);
             
             // Determine action based on touch position
-            const frameX = this.framePosition * this.blockSize + 50;
-            const frameY = 100;
+            const offsetX = 50;
+            const offsetY = 50;
+            const framePixelX = offsetX + this.frameX * this.blockSize;
+            const framePixelY = offsetY + this.frameY * this.blockSize;
             
-            if (x >= frameX && x <= frameX + this.blockSize * 2 && 
-                y >= frameY && y <= frameY + this.blockSize * 2) {
+            if (x >= framePixelX && x <= framePixelX + this.blockSize * 2 && 
+                y >= framePixelY && y <= framePixelY + this.blockSize * 2) {
                 // Touched the frame area - swap blocks
                 this.swapBlocks();
-            } else if (x < this.canvas.width / 2) {
-                // Left side - move left
-                this.moveFrame(-1);
+            } else if (x < this.canvas.width / 3) {
+                // Left area - move left
+                this.moveFrameHorizontal(-1);
+            } else if (x > this.canvas.width * 2 / 3) {
+                // Right area - move right
+                this.moveFrameHorizontal(1);
+            } else if (y < this.canvas.height / 2) {
+                // Top area - move up
+                this.moveFrameVertical(-1);
             } else {
-                // Right side - move right
-                this.moveFrame(1);
+                // Bottom area - move down
+                this.moveFrameVertical(1);
             }
         }, { passive: false });
 
@@ -167,9 +180,11 @@ class QuantumAttack {
         };
 
         setTimeout(() => {
-            addButtonListener('quantum-move-left', () => this.moveFrame(-1));
-            addButtonListener('quantum-move-right', () => this.moveFrame(1));
-            addButtonListener('quantum-switch-frame', () => this.switchFrame(1));
+            addButtonListener('quantum-move-up', () => this.moveFrameVertical(-1));
+            addButtonListener('quantum-move-down', () => this.moveFrameVertical(1));
+            addButtonListener('quantum-move-left', () => this.moveFrameHorizontal(-1));
+            addButtonListener('quantum-move-right', () => this.moveFrameHorizontal(1));
+            addButtonListener('quantum-switch-frame', () => this.switchFrame());
             addButtonListener('quantum-swap-blocks', () => this.swapBlocks());
         }, 100);
     }
@@ -180,7 +195,8 @@ class QuantumAttack {
         this.score = 0;
         this.level = 1;
         this.lines = 0;
-        this.framePosition = 3;
+        this.frameX = 2;
+        this.frameY = 10;
         this.activeFrame = 0;
         this.dropTimer = 0;
         this.initGrid();
@@ -207,29 +223,33 @@ class QuantumAttack {
         this.updateUI();
     }
 
-    moveFrame(direction) {
-        this.framePosition = Math.max(0, Math.min(this.gridWidth - 2, this.framePosition + direction));
+    moveFrameHorizontal(direction) {
+        this.frameX = Math.max(0, Math.min(this.gridWidth - 2, this.frameX + direction));
     }
 
-    switchFrame(direction) {
+    moveFrameVertical(direction) {
+        this.frameY = Math.max(0, Math.min(this.gridHeight - 2, this.frameY + direction));
+    }
+
+    switchFrame() {
         this.activeFrame = this.activeFrame === 0 ? 1 : 0;
     }
 
     swapBlocks() {
-        const x = this.framePosition;
-        const y = this.getFrameY();
+        const x = this.frameX;
+        const y = this.frameY;
         
-        if (y >= 0 && y + 1 < this.gridHeight) {
-            // Swap the two blocks horizontally
-            const temp = this.grid[y][x];
-            this.grid[y][x] = this.grid[y][x + 1];
-            this.grid[y][x + 1] = temp;
-            
-            // Also swap the blocks below if activeFrame is 1
-            if (this.activeFrame === 1 && y + 1 < this.gridHeight) {
-                const temp2 = this.grid[y + 1][x];
-                this.grid[y + 1][x] = this.grid[y + 1][x + 1];
-                this.grid[y + 1][x + 1] = temp2;
+        if (x >= 0 && x + 1 < this.gridWidth && y >= 0 && y + 1 < this.gridHeight) {
+            if (this.activeFrame === 0) {
+                // Left frame: swap horizontally (left-right)
+                const temp = this.grid[y][x];
+                this.grid[y][x] = this.grid[y][x + 1];
+                this.grid[y][x + 1] = temp;
+            } else {
+                // Right frame: swap vertically (up-down)
+                const temp = this.grid[y][x];
+                this.grid[y][x] = this.grid[y + 1][x];
+                this.grid[y + 1][x] = temp;
             }
             
             // Check for matches after swap
@@ -237,15 +257,7 @@ class QuantumAttack {
         }
     }
 
-    getFrameY() {
-        // Find the topmost non-empty row in the frame columns
-        for (let y = 0; y < this.gridHeight - 1; y++) {
-            if (this.grid[y][this.framePosition] !== 0 || this.grid[y][this.framePosition + 1] !== 0) {
-                return Math.max(0, y - (this.activeFrame === 0 ? 0 : 1));
-            }
-        }
-        return this.gridHeight - 2;
-    }
+
 
     checkMatches() {
         let hasMatches = false;
@@ -428,19 +440,33 @@ class QuantumAttack {
             this.ctx.stroke();
         }
 
-        // Draw frame
-        const frameX = offsetX + this.framePosition * this.blockSize;
-        const frameY = offsetY + this.getFrameY() * this.blockSize;
+        // Draw frames
+        const framePixelX = offsetX + this.frameX * this.blockSize;
+        const framePixelY = offsetY + this.frameY * this.blockSize;
         
-        this.ctx.strokeStyle = this.activeFrame === 0 ? '#ffff00' : '#ff00ff';
-        this.ctx.lineWidth = 3;
-        this.ctx.strokeRect(frameX, frameY, this.blockSize * 2, this.blockSize * 2);
+        // Draw left frame (horizontal swap)
+        this.ctx.strokeStyle = this.activeFrame === 0 ? '#ffff00' : '#666666';
+        this.ctx.lineWidth = this.activeFrame === 0 ? 4 : 2;
+        this.ctx.strokeRect(framePixelX, framePixelY, this.blockSize * 2, this.blockSize);
         
-        // Highlight active row
+        // Draw right frame (vertical swap)  
+        this.ctx.strokeStyle = this.activeFrame === 1 ? '#ff00ff' : '#666666';
+        this.ctx.lineWidth = this.activeFrame === 1 ? 4 : 2;
+        this.ctx.strokeRect(framePixelX + this.blockSize, framePixelY, this.blockSize, this.blockSize * 2);
+        
+        // Draw frame indicators
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = '12px Arial';
+        this.ctx.textAlign = 'center';
+        
+        // Left frame indicator (horizontal arrows)
+        if (this.activeFrame === 0) {
+            this.ctx.fillText('←→', framePixelX + this.blockSize, framePixelY - 5);
+        }
+        
+        // Right frame indicator (vertical arrows)
         if (this.activeFrame === 1) {
-            this.ctx.strokeStyle = '#ff00ff';
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(frameX, frameY + this.blockSize, this.blockSize * 2, this.blockSize);
+            this.ctx.fillText('↑↓', framePixelX + this.blockSize * 1.5, framePixelY - 5);
         }
 
         if (this.gameState === 'paused') {
@@ -461,7 +487,8 @@ class QuantumAttack {
         this.ctx.fillText('Press SPACE or TAP to Start', this.canvas.width/2, this.canvas.height/2 + 20);
         
         this.ctx.font = '14px Arial';
-        this.ctx.fillText('Move frames, swap blocks, clear vertical lines!', this.canvas.width/2, this.canvas.height/2 + 50);
+        this.ctx.fillText('Move frames up/down/left/right, swap blocks!', this.canvas.width/2, this.canvas.height/2 + 50);
+        this.ctx.fillText('A key to switch frames, Space to swap', this.canvas.width/2, this.canvas.height/2 + 70);
     }
 
     renderGameOver() {
