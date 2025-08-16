@@ -103,8 +103,24 @@
                     <span id="quantum-highscore"></span>
                 </div>
                 <canvas id="quantum-canvas" width="500" height="600" aria-label="Quantum Attack field" role="img"></canvas>
+                
+                <!-- Touch controls for mobile/iPad -->
+                <div class="quantum-mobile-controls" style="display: none;">
+                    <div class="quantum-states">
+                        <button id="quantum-state-up" class="quantum-state-btn" title="Spin Up">↑</button>
+                        <button id="quantum-state-down" class="quantum-state-btn" title="Spin Down">↓</button>
+                        <button id="quantum-state-super" class="quantum-state-btn" title="Superposition">⟡</button>
+                        <button id="quantum-state-entangled" class="quantum-state-btn" title="Entangled">∞</button>
+                    </div>
+                    <div class="quantum-actions">
+                        <button id="quantum-fire-btn" class="quantum-action-btn" title="Fire Laser">🔫</button>
+                        <button id="quantum-field-btn" class="quantum-action-btn" title="Quantum Field">⚡</button>
+                    </div>
+                </div>
+                
                 <div style="margin-top:8px; font-size: 14px; color:#666;">
-                    ← → 移动，空格 发射，Q/W/E/R 量子状态，F 量子场
+                    <span class="desktop-controls">← → 移动，空格 发射，Q/W/E/R 量子状态，F 量子场</span>
+                    <span class="mobile-controls" style="display: none;">タッチで移動・射撃、下のボタンで量子状態変更</span>
                 </div>
             </div>
         </div>

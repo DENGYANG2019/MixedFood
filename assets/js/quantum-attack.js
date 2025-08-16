@@ -86,6 +86,85 @@ class QuantumAttack {
         document.addEventListener('keyup', (e) => {
             this.keys[e.code] = false;
         });
+
+        // Touch controls for mobile/iPad
+        this.setupTouchControls();
+    }
+
+    setupTouchControls() {
+        // Touch/swipe handling for player movement
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let isTouching = false;
+
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (this.gameState !== 'playing') return;
+            
+            const touch = e.touches[0];
+            const rect = this.canvas.getBoundingClientRect();
+            touchStartX = touch.clientX - rect.left;
+            touchStartY = touch.clientY - rect.top;
+            isTouching = true;
+            
+            // Fire laser on tap
+            this.fireLaser();
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (this.gameState !== 'playing' || !isTouching) return;
+            
+            const touch = e.touches[0];
+            const rect = this.canvas.getBoundingClientRect();
+            const currentX = touch.clientX - rect.left;
+            const currentY = touch.clientY - rect.top;
+            
+            // Move player based on touch position
+            const canvasX = currentX * (this.canvas.width / rect.width);
+            this.player.x = Math.max(0, Math.min(this.canvas.width - this.player.width, canvasX - this.player.width / 2));
+            
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isTouching = false;
+        }, { passive: false });
+
+        // Virtual button handlers
+        this.setupVirtualButtons();
+    }
+
+    setupVirtualButtons() {
+        // Add event listeners for virtual buttons when they're created
+        const addButtonListener = (id, action) => {
+            const button = document.getElementById(id);
+            if (button) {
+                button.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (this.gameState === 'playing') {
+                        action();
+                    }
+                }, { passive: false });
+                
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (this.gameState === 'playing') {
+                        action();
+                    }
+                });
+            }
+        };
+
+        // Wait for DOM to be ready and add listeners
+        setTimeout(() => {
+            addButtonListener('quantum-fire-btn', () => this.fireLaser());
+            addButtonListener('quantum-field-btn', () => this.createQuantumField());
+            addButtonListener('quantum-state-up', () => this.changeQuantumState('spin-up'));
+            addButtonListener('quantum-state-down', () => this.changeQuantumState('spin-down'));
+            addButtonListener('quantum-state-super', () => this.changeQuantumState('superposition'));
+            addButtonListener('quantum-state-entangled', () => this.changeQuantumState('entangled'));
+        }, 100);
     }
 
     start() {

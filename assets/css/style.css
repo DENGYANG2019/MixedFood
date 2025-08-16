@@ -501,3 +501,141 @@ body {
 }
 .lang-menu .flag-btn { width: auto; height: 32px; line-height: 32px; padding: 0 8px; display: inline-flex; align-items: center; gap: 6px; }
 .lang-menu[hidden] { display: none !important; }
+
+/* Quantum Attack Touch Controls */
+.quantum-mobile-controls {
+    position: fixed;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 200;
+    pointer-events: none;
+}
+
+.quantum-mobile-controls > * {
+    pointer-events: auto;
+}
+
+.quantum-states {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.quantum-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.quantum-state-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 17, 0.8);
+    color: #ffffff;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.quantum-state-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.quantum-state-btn:nth-child(1) { border-color: #ff0000; color: #ff0000; } /* spin-up */
+.quantum-state-btn:nth-child(2) { border-color: #0000ff; color: #0000ff; } /* spin-down */
+.quantum-state-btn:nth-child(3) { border-color: #ffff00; color: #ffff00; } /* superposition */
+.quantum-state-btn:nth-child(4) { border-color: #ff00ff; color: #ff00ff; } /* entangled */
+
+.quantum-action-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background: rgba(0, 100, 200, 0.8);
+    color: #ffffff;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.quantum-action-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+}
+
+.quantum-action-btn:first-child { background: rgba(200, 50, 50, 0.8); } /* fire */
+.quantum-action-btn:last-child { background: rgba(150, 0, 200, 0.8); } /* field */
+
+/* Show touch controls on touch devices */
+@media (hover: none) and (pointer: coarse) {
+    .quantum-mobile-controls {
+        display: flex !important;
+    }
+    
+    .desktop-controls {
+        display: none !important;
+    }
+    
+    .mobile-controls {
+        display: inline !important;
+    }
+}
+
+/* Hide touch controls on desktop */
+@media (hover: hover) and (pointer: fine) {
+    .quantum-mobile-controls {
+        display: none !important;
+    }
+    
+    .desktop-controls {
+        display: inline !important;
+    }
+    
+    .mobile-controls {
+        display: none !important;
+    }
+}
+
+/* iPad specific adjustments */
+@media (min-width: 768px) and (max-width: 1024px) and (hover: none) {
+    .quantum-state-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    .quantum-action-btn {
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
+    }
+    
+    .quantum-states {
+        gap: 15px;
+    }
+    
+    .quantum-actions {
+        gap: 20px;
+    }
+}
