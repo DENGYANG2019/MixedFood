@@ -275,6 +275,22 @@
             closeMenu();
           }
         }, {passive:true});
+        
+        // 修复双击问题：添加双击事件处理
+        let clickCount = 0;
+        let clickTimer = null;
+        toggle.addEventListener('click', (e) => {
+          clickCount++;
+          if (clickCount === 1) {
+            clickTimer = setTimeout(() => {
+              clickCount = 0;
+            }, 300);
+          } else if (clickCount === 2) {
+            clearTimeout(clickTimer);
+            clickCount = 0;
+            closeMenu();
+          }
+        });
         menu.addEventListener('click', (e)=>{ e.stopPropagation(); });
         document.addEventListener('click', (e)=>{
           if (!menu.contains(e.target) && e.target !== toggle) closeMenu();
