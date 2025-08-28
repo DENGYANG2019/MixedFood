@@ -482,7 +482,7 @@ class QuantumAttack {
         this.ctx.fillStyle = '#ffffff';
         this.ctx.font = 'bold 36px Arial';
         this.ctx.textAlign = 'center';
-        this.ctx.fillText('QUANTATTACK', this.canvas.width/2, this.canvas.height/2 - 60);
+        this.ctx.fillText('クアントアタック', this.canvas.width/2, this.canvas.height/2 - 60);
         
         this.ctx.font = '18px Arial';
         this.ctx.fillText('Quantum Gate Puzzle', this.canvas.width/2, this.canvas.height/2 - 20);

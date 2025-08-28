@@ -6,6 +6,7 @@
 - 飞机大战（Plane）
 - 打地鼠（Whac-A-Mole）
 - 俄罗斯方块（Tetris）
+- クアントアタック（Quantum Attack）
 
 ## 运行方式
 - 直接双击或用浏览器打开 `index.html`。
@@ -30,7 +31,9 @@ MixedFood/
 │     ├─ minesweeper.js
 │     ├─ snake.js
 │     ├─ plane.js
-│     └─ mole.js
+│     ├─ mole.js
+│     ├─ tetris.js
+│     └─ quantum-attack.js
 ├─ README.md
 └─ LICENSE
 ```
@@ -44,12 +47,16 @@ MixedFood/
 - 贪吃蛇：方向键控制方向。
 - 飞机大战：左右方向键移动；空格发射子弹。
 - 打地鼠：鼠标点击洞或按键盘 `QWE/ASD/ZXC` 对应九宫格位置。
+- 俄罗斯方块：方向键移动和旋转，空格直落。
+- クアントアタック：方向键移动，空格切换框架，回车交换方块。
 
 ## 存储与最高分
 - 扫雷：最佳用时存于 `localStorage`（键：`minesweeperBestTime`）。
 - 贪吃蛇：最高分存于 `localStorage`（键：`snakeHighScore`）。
 - 飞机大战：最高分存于 `localStorage`（键：`planeHighScore`）。
 - 打地鼠：当前实现仅内存保存最高分（刷新后重置）。
+- 俄罗斯方块：得分、行数、等级存于内存（刷新后重置）。
+- クアントアタック：最高分存于 `localStorage`（键：`quantum-attack-highscore`）。
 
 ## 多语言
 - 页面右下角语言选择：中文（默认）/ English / 日本語。
