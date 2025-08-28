@@ -363,10 +363,11 @@ class QuantumAttack {
             this.addNewRow();
             this.dropTimer = 0;
             
-            // Increase speed with level
+            // Increase speed with level - halve the interval every 2 seconds
             if (this.lines >= this.level * 10) {
                 this.level++;
-                this.dropInterval = Math.max(500, this.dropInterval - 50);
+                // Halve the drop interval every 2 seconds (2000ms)
+                this.dropInterval = Math.max(500, this.dropInterval * 0.5);
             }
         }
 
@@ -484,7 +485,13 @@ class QuantumAttack {
         this.ctx.textAlign = 'center';
         this.ctx.fillText('クアントアタック', this.canvas.width/2, this.canvas.height/2 - 60);
         
+        // Add italic QUANTATTUCK text above the Japanese title
+        this.ctx.font = 'italic bold 24px Arial';
+        this.ctx.fillStyle = '#8888ff';
+        this.ctx.fillText('QUANTATTUCK', this.canvas.width/2, this.canvas.height/2 - 100);
+        
         this.ctx.font = '18px Arial';
+        this.ctx.fillStyle = '#ffffff';
         this.ctx.fillText('Quantum Gate Puzzle', this.canvas.width/2, this.canvas.height/2 - 20);
         
         this.ctx.font = '16px Arial';
