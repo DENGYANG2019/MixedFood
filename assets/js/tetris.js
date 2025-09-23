@@ -229,9 +229,13 @@
   }
 
   function resizeCanvasForDPR(){
-    // Fit by both width (95vw) and height (~65vh) to make game area larger on mobile
-    const maxWidth = window.innerWidth * 0.95;
-    const maxHeight = Math.max(300, Math.min(window.innerHeight * 0.65, CANVAS_HEIGHT));
+    // 桌面端使用更大的画布，手机端保持响应式
+    const isMobile = window.innerWidth <= 900;
+    const maxWidth = isMobile ? window.innerWidth * 0.95 : Math.min(window.innerWidth * 0.6, 400);
+    const maxHeight = isMobile ? 
+      Math.max(300, Math.min(window.innerHeight * 0.65, CANVAS_HEIGHT)) : 
+      Math.min(window.innerHeight * 0.8, CANVAS_HEIGHT);
+    
     // start from height cap
     let cssHeight = maxHeight;
     let cssWidth = cssHeight * (CANVAS_WIDTH / CANVAS_HEIGHT);
