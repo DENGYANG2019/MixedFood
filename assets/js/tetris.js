@@ -229,9 +229,9 @@
   }
 
   function resizeCanvasForDPR(){
-    // Fit by both width (92vw) and height (~56vh) to avoid overlong layout on mobile
-    const maxWidth = window.innerWidth * 0.92;
-    const maxHeight = Math.max(260, Math.min(window.innerHeight * 0.56, CANVAS_HEIGHT));
+    // Fit by both width (95vw) and height (~65vh) to make game area larger on mobile
+    const maxWidth = window.innerWidth * 0.95;
+    const maxHeight = Math.max(300, Math.min(window.innerHeight * 0.65, CANVAS_HEIGHT));
     // start from height cap
     let cssHeight = maxHeight;
     let cssWidth = cssHeight * (CANVAS_WIDTH / CANVAS_HEIGHT);
