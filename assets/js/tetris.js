@@ -76,16 +76,13 @@
   
   // 重置所有长按状态
   function resetAllLongPressStates() {
-    console.log('Resetting long press states:', Object.keys(longPressStates));
     for (const buttonId in longPressStates) {
       const state = longPressStates[buttonId];
       if (state.longPressTimer) {
-        console.log(`Clearing timer for ${buttonId}`);
         clearTimeout(state.longPressTimer);
         state.longPressTimer = null;
       }
       if (state.repeatInterval) {
-        console.log(`Clearing interval for ${buttonId}`);
         clearInterval(state.repeatInterval);
         state.repeatInterval = null;
       }
@@ -283,6 +280,8 @@
     score = 0; linesClearedTotal = 0; level = 1;
     dropTimerMs = 0; dropIntervalMs = levelToDropMs(level);
     isRunning = false; isGameOver = false;
+    // 重置长按状态
+    resetAllLongPressStates();
     refillQueue();
     spawnPiece();
     updateSidebar();
@@ -305,7 +304,6 @@
     activePiece = { type, rotation:0, x:4, y:1 };
     if (collides(activePiece,0,0,0)) setGameOver();
     // 重置所有长按状态，防止新方块出现时还在执行之前的移动指令
-    console.log('Spawning new piece, resetting long press states');
     resetAllLongPressStates();
     drawNext();
   }
