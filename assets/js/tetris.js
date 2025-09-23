@@ -98,9 +98,82 @@
       el.addEventListener('click', handler);
       el.addEventListener('touchstart', (e)=>{ e.preventDefault(); handler(); }, {passive:false});
     };
-    bindPress('tetris-left', ()=> tryMove(-1,0));
-    bindPress('tetris-right', ()=> tryMove(1,0));
-    bindPress('tetris-down', ()=> softDrop());
+
+    // 长按功能：超过0.1秒时等同于持续点击
+    const bindLongPress = (id, fn) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      
+      let longPressTimer = null;
+      let isLongPressing = false;
+      let repeatInterval = null;
+      
+      const startLongPress = () => {
+        if (isGameOver) return;
+        if (!isRunning) startTetris();
+        
+        // 立即执行一次
+        fn();
+        
+        // 设置长按检测定时器
+        longPressTimer = setTimeout(() => {
+          isLongPressing = true;
+          // 开始重复执行，每50ms执行一次
+          repeatInterval = setInterval(() => {
+            if (isGameOver || !isRunning) {
+              stopLongPress();
+              return;
+            }
+            fn();
+          }, 50);
+        }, 100); // 0.1秒后开始重复
+      };
+      
+      const stopLongPress = () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+        if (repeatInterval) {
+          clearInterval(repeatInterval);
+          repeatInterval = null;
+        }
+        isLongPressing = false;
+      };
+      
+      // 鼠标事件
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        startLongPress();
+      });
+      
+      el.addEventListener('mouseup', stopLongPress);
+      el.addEventListener('mouseleave', stopLongPress);
+      
+      // 触摸事件
+      el.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startLongPress();
+      }, {passive: false});
+      
+      el.addEventListener('touchend', stopLongPress);
+      el.addEventListener('touchcancel', stopLongPress);
+      
+      // 点击事件（用于兼容性）
+      el.addEventListener('click', (e) => {
+        if (!isLongPressing) {
+          e.preventDefault();
+          if (isGameOver) return;
+          if (!isRunning) startTetris();
+          fn();
+        }
+      });
+    };
+    // 方向键使用长按功能
+    bindLongPress('tetris-left', ()=> tryMove(-1,0));
+    bindLongPress('tetris-right', ()=> tryMove(1,0));
+    bindLongPress('tetris-down', ()=> softDrop());
+    // 旋转和硬降保持普通点击
     bindPress('tetris-rotate', ()=> rotate(+1));
     bindPress('tetris-drop', ()=> hardDrop());
 
