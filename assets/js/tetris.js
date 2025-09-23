@@ -71,7 +71,6 @@
   
   // 长按状态管理
   let longPressStates = {};
-  let hardDropInterval = null;
 
   function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
   
@@ -88,11 +87,6 @@
         state.repeatInterval = null;
       }
       state.isLongPressing = false;
-    }
-    // 停止硬降连续下落
-    if (hardDropInterval) {
-      clearInterval(hardDropInterval);
-      hardDropInterval = null;
     }
   }
   function shade(hex, amount){
@@ -200,13 +194,13 @@
         }
       });
     };
-    // 方向键使用长按功能
+    // 方向键和硬降使用长按功能
     bindLongPress('tetris-left', ()=> tryMove(-1,0));
     bindLongPress('tetris-right', ()=> tryMove(1,0));
     bindLongPress('tetris-down', ()=> softDrop());
-    // 旋转和硬降保持普通点击
+    bindLongPress('tetris-drop', ()=> hardDrop());
+    // 旋转保持普通点击
     bindPress('tetris-rotate', ()=> rotate(+1));
-    bindPress('tetris-drop', ()=> hardDrop());
 
     window.addEventListener('keydown', (e) => {
       if (window.currentGame !== 'tetris') return;
@@ -348,35 +342,13 @@
   function softDrop(){ if (tryMove(0,1)){ score += SOFT_DROP_POINT_PER_CELL; updateSidebar(); } else { lockPiece(); } }
   function hardDrop(){ 
     if (!activePiece) return; 
-    // 使用连续下落而不是瞬间落下
-    startHardDrop();
-  }
-  
-  // 开始硬降（连续下落）
-  function startHardDrop() {
-    if (!activePiece) return;
-    
-    // 先清除之前的硬降间隔
-    if (hardDropInterval) {
-      clearInterval(hardDropInterval);
+    // 执行一次硬降下落
+    if (tryMove(0, 1)) {
+      score += HARD_DROP_POINT_PER_CELL;
+      updateSidebar();
+    } else {
+      lockPiece();
     }
-    
-    hardDropInterval = setInterval(() => {
-      if (!activePiece || isGameOver || !isRunning) {
-        clearInterval(hardDropInterval);
-        hardDropInterval = null;
-        return;
-      }
-      
-      if (tryMove(0, 1)) {
-        score += HARD_DROP_POINT_PER_CELL;
-        updateSidebar();
-      } else {
-        clearInterval(hardDropInterval);
-        hardDropInterval = null;
-        lockPiece();
-      }
-    }, 50); // 与方向键相同的速度：每50ms执行一次
   }
   function hardDropDistance(){ let d=0; while(!collides(activePiece,0,d+1)) d++; return d; }
 
