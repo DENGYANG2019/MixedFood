@@ -1,0 +1,647 @@
+html, body { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f8fafc;
+    text-align: center;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+/* 兼容 iOS 安全区 */
+:root {
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+    --safe-left: env(safe-area-inset-left);
+    --safe-right: env(safe-area-inset-right);
+}
+#main-title {
+    margin: 0;
+    padding: 20px 0;
+    width: 100%;
+    text-align: center;
+}
+#game-controls {
+    height: 3em;
+    min-height: 3em;
+    max-height: 3em;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+}
+#minefield {
+    width: 90vw;
+    max-width: 360px;
+    height: 90vw;
+    max-height: 360px;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 0;
+    margin: 40px auto 0 auto;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: #e3f0ff;
+    touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+.cell {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1.5px solid #7bb0ff;
+    background: #e3f0ff;
+    font-size: 22px;
+    line-height: 1;
+    text-align: center;
+    overflow: hidden;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, color 0.15s;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+.cell.open {
+    background: #f6faff;
+    color: #2d5c88;
+    cursor: default;
+}
+.cell.flag {
+    background: #fffbe6;
+    color: #e6b800;
+}
+.cell.mine {
+    background: #ffeaea;
+    color: #e74c3c;
+}
+#tabs {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+#tabs button {
+    padding: 8px 24px;
+    margin: 0 8px;
+    border: none;
+    background: #e3f0ff;
+    color: #2d5c88;
+    font-size: 18px;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.2s, color 0.2s;
+}
+#tabs button.active {
+    background: #7bb0ff;
+    color: #fff;
+    font-weight: bold;
+}
+#snake-canvas {
+    background: #f6faff;
+    border: 2px solid #7bb0ff;
+    margin-top: 20px;
+    border-radius: 8px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: min(92vw, 480px);
+    height: auto;
+    touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+#plane-canvas {
+    background: #f6faff;
+    border: 2px solid #7bb0ff;
+    margin-top: 20px;
+    border-radius: 8px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: min(92vw, 400px);
+    height: auto;
+    touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+#plane-controls {
+    margin-bottom: 10px;
+}
+#main-layout {
+    display: flex;
+    width: 100vw;
+    height: calc(100vh - 80px);
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+#sidebar {
+    width: 140px;
+    background: #e3f0ff;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 24px 0 0 0;
+    min-height: 100%;
+    box-shadow: 2px 0 8px #e0e8f0;
+    flex-shrink: 0;
+}
+#sidebar button {
+    padding: 18px 0;
+    margin: 0 12px 18px 12px;
+    border: none;
+    background: #e3f0ff;
+    color: #2d5c88;
+    font-size: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.2s, color 0.2s;
+}
+#menu-toggle {
+    display: none;
+    justify-content: flex-start; /* 菜单两字靠左 */
+    text-align: left;
+    width: 160px;
+}
+#sidebar button.active {
+    background: #7bb0ff;
+    color: #fff;
+    font-weight: bold;
+}
+#lang-section {
+    display: none; /* 侧栏内的旧语言选择器隐藏 */
+}
+#lang-select {
+    display: none;
+}
+
+/* 左下角悬浮语言切换，仅国旗按钮 */
+#lang-floating {
+    position: fixed;
+    left: max(8px, env(safe-area-inset-left));
+    bottom: max(8px, env(safe-area-inset-bottom));
+    display: flex;
+    gap: 6px;
+    z-index: 999;
+}
+.flag-btn {
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 6px;
+    border: 1px solid #7bb0ff33;
+    background: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: 0 2px 6px #00000014;
+}
+.flag-btn:focus { outline: 2px solid #7bb0ff66; }
+#lang-select:focus {
+    border-color: #2d5c88;
+}
+#game-contents {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+    min-height: 100%;
+    padding-top: calc(20px + var(--safe-top));
+    margin-left: 0;
+}
+#status {
+    min-height: 2.5em;
+    height: 2.5em;
+    max-height: 2.5em;
+    line-height: 2.5em;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    gap: 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+#minesweeper-besttime {
+    padding-left: 10px;
+    font-size: 0.95em;
+    color: #888;
+}
+#status.win, #status.fail {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+#status.win {
+    color: #219a00;
+    font-weight: bold;
+    font-size: 1.3em;
+}
+#status.fail {
+    color: #e53935;
+    font-weight: bold;
+    font-size: 1.3em;
+}
+#minefield.win {
+    background: #e6ffe6;
+    transition: background 0.3s;
+}
+#minefield.fail {
+    background: #ffeaea;
+    transition: background 0.3s;
+}
+#status.flash, #minefield.flash {
+    animation: flash-anim 0.3s alternate 3 !important;
+}
+@keyframes flash-anim {
+    0% { box-shadow: 0 0 0 0 #fff0; background: inherit; }
+    40% { box-shadow: 0 0 16px 8px #fff8; background: #fffbe6; }
+    60% { box-shadow: 0 0 24px 12px #fff8; background: #fffbe6; }
+    100% { box-shadow: 0 0 0 0 #fff0; background: inherit; }
+}
+#status.win.flash, #minefield.win.flash {
+    animation: win-flash 0.3s alternate 3 !important;
+}
+@keyframes win-flash {
+    0% { background: #e6ffe6; color: #219a00; }
+    50% { background: #baffba; color: #fff; }
+    100% { background: #e6ffe6; color: #219a00; }
+}
+#status.fail.flash, #minefield.fail.flash {
+    animation: fail-flash 0.3s alternate 3 !important;
+}
+@keyframes fail-flash {
+    0% { background: #ffeaea; color: #e53935; }
+    50% { background: #ffbdbd; color: #fff; }
+    100% { background: #ffeaea; color: #e53935; }
+}
+/* 打地鼠样式 */
+#mole-section {
+    text-align: center;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#mole-controls {
+    margin-bottom: 10px;
+}
+#mole-canvas {
+    border: 2px solid #a0522d;
+    background: #f9e4b7;
+    margin: 0 auto; /* 在非 flex 环境下水平居中 */
+    display: block;
+    box-sizing: border-box;
+    max-width: 100%;
+    align-self: center; /* 在 #mole-section（flex 容器）中确保水平居中 */
+    width: min(92vw, 400px);
+    height: auto;
+    touch-action: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* 响应式：iPad/手机（竖屏或窄屏）将侧栏变为顶部菜单 */
+@media (max-width: 900px) {
+  #main-layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #sidebar {
+    width: 100%;
+    min-height: auto;
+    box-shadow: 0 2px 8px #e0e8f0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 12px;
+    padding: 8px 8px calc(8px + var(--safe-bottom)) 8px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  #menu-toggle {
+    display: inline-block;
+    margin: 0 8px;
+    padding: 10px 14px;
+    font-size: 18px;
+    border-radius: 8px;
+    background: #7bb0ff;
+    color: #fff;
+    width: auto;
+    align-self: flex-start; /* 按钮靠左 */
+  }
+  #menu-buttons {
+    width: 100%;
+    display: none;
+  }
+  #menu-buttons.expanded {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 12px;
+  }
+/* Touch actions for controls */
+.flag-btn, #menu-toggle, .tetris-touch-controls .ctrl { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  #sidebar button {
+    margin: 0;
+    flex: 1 1 140px;
+    font-size: 16px;
+    padding: 12px 0;
+  }
+  #lang-section {
+    margin-top: 0;
+    padding: 0 8px 8px 8px;
+    order: 99;
+    width: 160px;
+  }
+  #game-contents {
+    padding-top: 12px;
+  }
+  #minefield {
+    width: 92vw;
+    height: 92vw;
+  }
+}
+
+/* 超小屏微调 */
+@media (max-width: 480px) {
+  #main-title { font-size: 24px; }
+  #sidebar button { flex: 1 1 44%; min-width: 120px; }
+}
+
+/* === Tetris styles === */
+#tetris-controls { margin-top: 10px; display: flex; gap: 10px; align-items: center; justify-content: center; }
+#tetris-stats { margin: 10px 0; color: #2d5c88; }
+#tetris-field { position: relative; display: inline-block; }
+#tetris-canvas {
+  background: #f6faff;
+  border: 2px solid #7bb0ff;
+  border-radius: 8px;
+  display: block;
+  margin: 0 auto;
+  width: min(92vw, 300px);
+  height: auto;
+}
+.tetris-overlay {
+  position: absolute; inset: 0; display: none; place-items: center;
+  background: #0008; color: #fff; font-weight: bold; border-radius: 8px;
+  pointer-events: none; /* do not block touch */
+}
+#tetris-next-wrap { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 12px auto; justify-content: center; }
+.tetris-next { background: #f6faff; border: 2px solid #7bb0ff55; border-radius: 8px; width: 60px; height: 60px; }
+
+/* New mobile layout for Tetris */
+.tetris-mobile-right { display: none; }
+.tetris-dpad { display: none; }
+
+@media (max-width: 900px) {
+  /* Place right-side preview at top-right */
+  .tetris-next-mobile {
+    position: fixed;
+    right: max(10px, var(--safe-right));
+    top: max(120px, var(--safe-top) + 80px);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    z-index: 200;
+  }
+
+  /* Place right-side actions at bottom-right */
+  .tetris-mobile-right {
+    position: fixed;
+    right: max(10px, var(--safe-right));
+    bottom: max(10px, var(--safe-bottom));
+    display: grid;
+    grid-template-rows: auto auto;
+    align-items: center;
+    justify-items: center;
+    gap: 10px;
+    z-index: 200;
+  }
+  .tetris-mobile-right .action {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(123, 176, 255, 0.8);
+    color: #fff;
+    font-size: 24px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+  }
+  .tetris-mobile-right .action.rotate { background: linear-gradient(180deg, rgba(123, 176, 255, 0.8), rgba(45, 92, 136, 0.8)); }
+  .tetris-mobile-right .action.primary { background: linear-gradient(180deg, rgba(54, 200, 121, 0.8), rgba(44, 177, 105, 0.8)); }
+
+  /* Bottom-left circular D-pad */
+  .tetris-dpad {
+    position: fixed;
+    left: max(10px, var(--safe-left));
+    bottom: max(10px, var(--safe-bottom));
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.7);
+    border: 2px solid rgba(123, 176, 255, 0.3);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15);
+    display: grid;
+    place-items: center;
+    z-index: 200;
+  }
+  .tetris-dpad .dpad { position: absolute; width: 58px; height: 58px; border-radius: 50%; border: none; background: rgba(227, 240, 255, 0.8); color: #2d5c88; font-size: 22px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1); }
+  .tetris-dpad .dpad.left { left: 6px; top: 50%; transform: translateY(-50%); }
+  .tetris-dpad .dpad.right { right: 6px; top: 50%; transform: translateY(-50%); }
+  .tetris-dpad .dpad.down { left: 50%; bottom: 6px; transform: translateX(-50%); }
+
+  /* Hide desktop preview spacing on mobile */
+  #tetris-next-wrap { margin: 0; }
+}
+
+/* 超小屏进一步缩放按钮 */
+@media (max-width: 420px) {
+  .tetris-mobile-right .action { width: 64px; height: 64px; font-size: 22px; }
+  .tetris-dpad { width: 136px; height: 136px; }
+  .tetris-dpad .dpad { width: 50px; height: 50px; font-size: 20px; }
+}
+
+/* Tetris touch controls - grid (old) hidden as we replaced with dpad+right panel */
+.tetris-touch-controls { display: none !important; }
+
+/* Collapsible language menu */
+#lang-floating { position: fixed; left: max(8px, env(safe-area-inset-left)); bottom: max(8px, env(safe-area-inset-bottom)); display: grid; gap: 6px; z-index: 999; pointer-events: none; }
+#lang-floating > * { pointer-events: auto; }
+#lang-toggle { width: 36px; height: 36px; font-size: 18px; border-radius: 8px; }
+.lang-menu { 
+  position: absolute; 
+  bottom: 100%; 
+  left: 0; 
+  margin-bottom: 8px;
+  display: grid; 
+  gap: 6px; 
+  background: #ffffffee; 
+  border: 1px solid #7bb0ff33; 
+  border-radius: 8px; 
+  padding: 8px; 
+  box-shadow: 0 4px 16px #00000022; 
+}
+.lang-menu .flag-btn { width: auto; height: 32px; line-height: 32px; padding: 0 8px; display: inline-flex; align-items: center; gap: 6px; }
+.lang-menu[hidden] { display: none !important; }
+
+/* Quantum Attack Touch Controls */
+.quantum-mobile-controls {
+    position: fixed;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 200;
+    pointer-events: none;
+}
+
+.quantum-mobile-controls > * {
+    pointer-events: auto;
+}
+
+.quantum-states {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.quantum-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.quantum-state-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 17, 0.8);
+    color: #ffffff;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.quantum-state-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.quantum-state-btn:nth-child(1) { border-color: #ff0000; color: #ff0000; } /* spin-up */
+.quantum-state-btn:nth-child(2) { border-color: #0000ff; color: #0000ff; } /* spin-down */
+.quantum-state-btn:nth-child(3) { border-color: #ffff00; color: #ffff00; } /* superposition */
+.quantum-state-btn:nth-child(4) { border-color: #ff00ff; color: #ff00ff; } /* entangled */
+
+.quantum-action-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background: rgba(0, 100, 200, 0.8);
+    color: #ffffff;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.quantum-action-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+}
+
+.quantum-action-btn:first-child { background: rgba(200, 50, 50, 0.8); } /* fire */
+.quantum-action-btn:last-child { background: rgba(150, 0, 200, 0.8); } /* field */
+
+/* Show touch controls on touch devices */
+@media (max-width: 1024px) {
+    .quantum-mobile-controls {
+        display: flex !important;
+    }
+    
+    .desktop-controls {
+        display: none !important;
+    }
+    
+    .mobile-controls {
+        display: inline !important;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .quantum-mobile-controls {
+        display: flex !important;
+    }
+}
+
+/* Hide touch controls on desktop */
+@media (hover: hover) and (pointer: fine) {
+    .quantum-mobile-controls {
+        display: none !important;
+    }
+    
+    .desktop-controls {
+        display: inline !important;
+    }
+    
+    .mobile-controls {
+        display: none !important;
+    }
+}
+
+/* iPad specific adjustments */
+@media (min-width: 768px) and (max-width: 1024px) and (hover: none) {
+    .quantum-state-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+    
+    .quantum-action-btn {
+        width: 70px;
+        height: 70px;
+        font-size: 28px;
+    }
+    
+    .quantum-states {
+        gap: 15px;
+    }
+    
+    .quantum-actions {
+        gap: 20px;
+    }
+}
