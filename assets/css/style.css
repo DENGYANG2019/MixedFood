@@ -387,8 +387,22 @@ body {
 }
 
 /* === Tetris styles === */
-#tetris-controls { margin-top: 10px; display: flex; gap: 10px; align-items: center; justify-content: center; }
-#tetris-stats { margin: 10px 0; color: #2d5c88; }
+#tetris-controls { margin-top: 8px; display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+#tetris-controls button {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 5px;
+  border: 1px solid #7bb0ff;
+  background: #e3f0ff;
+  color: #2d5c88;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+#tetris-controls button:hover {
+  background: #7bb0ff;
+  color: #fff;
+}
+#tetris-stats { margin: 8px 0; color: #2d5c88; font-size: 14px; }
 #tetris-field { position: relative; display: inline-block; }
 #tetris-canvas {
   background: #f6faff;
@@ -396,7 +410,7 @@ body {
   border-radius: 8px;
   display: block;
   margin: 0 auto;
-  width: min(92vw, 300px);
+  width: min(95vw, 350px);
   height: auto;
 }
 .tetris-overlay {
@@ -412,27 +426,50 @@ body {
 .tetris-dpad { display: none; }
 
 @media (max-width: 900px) {
+  /* 手机端俄罗斯方块控制按钮更紧凑 */
+  #tetris-controls { 
+    margin-top: 6px; 
+    gap: 6px; 
+    font-size: 14px; 
+  }
+  
+  #tetris-controls button {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+  }
+  
+  /* 手机端俄罗斯方块统计信息更紧凑 */
+  #tetris-stats { 
+    margin: 6px 0; 
+    font-size: 13px; 
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+    gap: 8px; 
+  }
+  
   /* Place right-side preview at top-right */
   .tetris-next-mobile {
     position: fixed;
-    right: max(10px, var(--safe-right));
-    top: max(120px, var(--safe-top) + 80px);
+    right: max(8px, var(--safe-right));
+    top: max(100px, var(--safe-top) + 60px);
     display: grid;
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 6px;
     z-index: 200;
   }
 
   /* Place right-side actions at bottom-right */
   .tetris-mobile-right {
     position: fixed;
-    right: max(10px, var(--safe-right));
-    bottom: max(10px, var(--safe-bottom));
+    right: max(8px, var(--safe-right));
+    bottom: max(8px, var(--safe-bottom));
     display: grid;
     grid-template-rows: auto auto;
     align-items: center;
     justify-items: center;
-    gap: 10px;
+    gap: 8px;
     z-index: 200;
   }
   .tetris-mobile-right .action {
@@ -451,14 +488,14 @@ body {
   /* Bottom-left circular D-pad */
   .tetris-dpad {
     position: fixed;
-    left: max(10px, var(--safe-left));
-    bottom: max(10px, var(--safe-bottom));
-    width: 150px;
-    height: 150px;
+    left: max(8px, var(--safe-left));
+    bottom: max(8px, var(--safe-bottom));
+    width: 140px;
+    height: 140px;
     border-radius: 50%;
     background: rgba(255,255,255,0.7);
     border: 2px solid rgba(123, 176, 255, 0.3);
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
     display: grid;
     place-items: center;
     z-index: 200;
@@ -474,9 +511,9 @@ body {
 
 /* 超小屏进一步缩放按钮 */
 @media (max-width: 420px) {
-  .tetris-mobile-right .action { width: 64px; height: 64px; font-size: 22px; }
-  .tetris-dpad { width: 136px; height: 136px; }
-  .tetris-dpad .dpad { width: 50px; height: 50px; font-size: 20px; }
+  .tetris-mobile-right .action { width: 60px; height: 60px; font-size: 20px; }
+  .tetris-dpad { width: 130px; height: 130px; }
+  .tetris-dpad .dpad { width: 48px; height: 48px; font-size: 18px; }
 }
 
 /* Tetris touch controls - grid (old) hidden as we replaced with dpad+right panel */
