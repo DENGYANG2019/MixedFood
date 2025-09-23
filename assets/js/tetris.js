@@ -71,6 +71,7 @@
   
   // 长按状态管理
   let longPressStates = {};
+  let hardDropInterval = null;
 
   function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
   
@@ -87,6 +88,11 @@
         state.repeatInterval = null;
       }
       state.isLongPressing = false;
+    }
+    // 停止硬降连续下落
+    if (hardDropInterval) {
+      clearInterval(hardDropInterval);
+      hardDropInterval = null;
     }
   }
   function shade(hex, amount){
@@ -340,7 +346,38 @@
     return false;
   }
   function softDrop(){ if (tryMove(0,1)){ score += SOFT_DROP_POINT_PER_CELL; updateSidebar(); } else { lockPiece(); } }
-  function hardDrop(){ if (!activePiece) return; const d = hardDropDistance(); if (d>0){ activePiece.y += d; score += d*HARD_DROP_POINT_PER_CELL; lockPiece(); } }
+  function hardDrop(){ 
+    if (!activePiece) return; 
+    // 使用连续下落而不是瞬间落下
+    startHardDrop();
+  }
+  
+  // 开始硬降（连续下落）
+  function startHardDrop() {
+    if (!activePiece) return;
+    
+    // 先清除之前的硬降间隔
+    if (hardDropInterval) {
+      clearInterval(hardDropInterval);
+    }
+    
+    hardDropInterval = setInterval(() => {
+      if (!activePiece || isGameOver || !isRunning) {
+        clearInterval(hardDropInterval);
+        hardDropInterval = null;
+        return;
+      }
+      
+      if (tryMove(0, 1)) {
+        score += HARD_DROP_POINT_PER_CELL;
+        updateSidebar();
+      } else {
+        clearInterval(hardDropInterval);
+        hardDropInterval = null;
+        lockPiece();
+      }
+    }, 50); // 与方向键相同的速度：每50ms执行一次
+  }
   function hardDropDistance(){ let d=0; while(!collides(activePiece,0,d+1)) d++; return d; }
 
   function lockPiece(){
