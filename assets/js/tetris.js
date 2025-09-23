@@ -68,8 +68,27 @@
   let score, linesClearedTotal, level;
   let dropTimerMs, dropIntervalMs, lastTime;
   let isRunning, isGameOver;
+  
+  // 长按状态管理
+  let longPressStates = {};
 
   function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+  
+  // 重置所有长按状态
+  function resetAllLongPressStates() {
+    for (const buttonId in longPressStates) {
+      const state = longPressStates[buttonId];
+      if (state.longPressTimer) {
+        clearTimeout(state.longPressTimer);
+        state.longPressTimer = null;
+      }
+      if (state.repeatInterval) {
+        clearInterval(state.repeatInterval);
+        state.repeatInterval = null;
+      }
+      state.isLongPressing = false;
+    }
+  }
   function shade(hex, amount){
     const num = parseInt(hex.slice(1), 16);
     const r = (num >> 16) & 0xff, g = (num >> 8) & 0xff, b = num & 0xff;
@@ -104,9 +123,12 @@
       const el = document.getElementById(id);
       if (!el) return;
       
-      let longPressTimer = null;
-      let isLongPressing = false;
-      let repeatInterval = null;
+      // 初始化长按状态
+      longPressStates[id] = {
+        longPressTimer: null,
+        isLongPressing: false,
+        repeatInterval: null
+      };
       
       const startLongPress = () => {
         if (isGameOver) return;
@@ -116,12 +138,12 @@
         fn();
         
         // 设置长按检测定时器
-        longPressTimer = setTimeout(() => {
-          isLongPressing = true;
+        longPressStates[id].longPressTimer = setTimeout(() => {
+          longPressStates[id].isLongPressing = true;
           // 开始重复执行，每50ms执行一次
-          repeatInterval = setInterval(() => {
+          longPressStates[id].repeatInterval = setInterval(() => {
             if (isGameOver || !isRunning) {
-              stopLongPress();
+              stopLongPress(id);
               return;
             }
             fn();
@@ -129,16 +151,19 @@
         }, 100); // 0.1秒后开始重复
       };
       
-      const stopLongPress = () => {
-        if (longPressTimer) {
-          clearTimeout(longPressTimer);
-          longPressTimer = null;
+      const stopLongPress = (buttonId) => {
+        const state = longPressStates[buttonId];
+        if (!state) return;
+        
+        if (state.longPressTimer) {
+          clearTimeout(state.longPressTimer);
+          state.longPressTimer = null;
         }
-        if (repeatInterval) {
-          clearInterval(repeatInterval);
-          repeatInterval = null;
+        if (state.repeatInterval) {
+          clearInterval(state.repeatInterval);
+          state.repeatInterval = null;
         }
-        isLongPressing = false;
+        state.isLongPressing = false;
       };
       
       // 鼠标事件
@@ -147,8 +172,8 @@
         startLongPress();
       });
       
-      el.addEventListener('mouseup', stopLongPress);
-      el.addEventListener('mouseleave', stopLongPress);
+      el.addEventListener('mouseup', () => stopLongPress(id));
+      el.addEventListener('mouseleave', () => stopLongPress(id));
       
       // 触摸事件
       el.addEventListener('touchstart', (e) => {
@@ -156,12 +181,12 @@
         startLongPress();
       }, {passive: false});
       
-      el.addEventListener('touchend', stopLongPress);
-      el.addEventListener('touchcancel', stopLongPress);
+      el.addEventListener('touchend', () => stopLongPress(id));
+      el.addEventListener('touchcancel', () => stopLongPress(id));
       
       // 点击事件（用于兼容性）
       el.addEventListener('click', (e) => {
-        if (!isLongPressing) {
+        if (!longPressStates[id].isLongPressing) {
           e.preventDefault();
           if (isGameOver) return;
           if (!isRunning) startTetris();
@@ -276,6 +301,8 @@
     refillQueue();
     activePiece = { type, rotation:0, x:4, y:1 };
     if (collides(activePiece,0,0,0)) setGameOver();
+    // 重置所有长按状态，防止新方块出现时还在执行之前的移动指令
+    resetAllLongPressStates();
     drawNext();
   }
 
