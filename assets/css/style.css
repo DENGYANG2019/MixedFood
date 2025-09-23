@@ -527,25 +527,21 @@ body {
   .tetris-mobile-right .action.rotate { background: linear-gradient(180deg, rgba(123, 176, 255, 0.8), rgba(45, 92, 136, 0.8)); }
   .tetris-mobile-right .action.primary { background: linear-gradient(180deg, rgba(54, 200, 121, 0.8), rgba(44, 177, 105, 0.8)); }
 
-  /* Bottom-left circular D-pad */
+  /* Bottom-left D-pad without background */
   .tetris-dpad {
     position: fixed;
     left: max(8px, var(--safe-left));
     bottom: max(8px, var(--safe-bottom));
     width: 140px;
     height: 140px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.7);
-    border: 2px solid rgba(123, 176, 255, 0.3);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
     display: grid;
     place-items: center;
     z-index: 200;
   }
   .tetris-dpad .dpad { position: absolute; width: 58px; height: 58px; border-radius: 50%; border: none; background: rgba(227, 240, 255, 0.8); color: #2d5c88; font-size: 22px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1); }
-  .tetris-dpad .dpad.left { left: 6px; top: 50%; transform: translateY(-50%); }
-  .tetris-dpad .dpad.right { right: 6px; top: 50%; transform: translateY(-50%); }
-  .tetris-dpad .dpad.down { left: 50%; bottom: 6px; transform: translateX(-50%); }
+  .tetris-dpad .dpad.left { left: 0px; top: 50%; transform: translateY(-50%); }
+  .tetris-dpad .dpad.right { right: 0px; top: 50%; transform: translateY(-50%); }
+  .tetris-dpad .dpad.down { left: 50%; bottom: 0px; transform: translateX(-50%); }
 
   /* Hide desktop preview spacing on mobile */
   #tetris-next-wrap { margin: 0; }
@@ -554,8 +550,14 @@ body {
 /* 超小屏进一步缩放按钮 */
 @media (max-width: 420px) {
   .tetris-mobile-right .action { width: 60px; height: 60px; font-size: 20px; }
-  .tetris-dpad { width: 130px; height: 130px; }
+  .tetris-dpad { 
+    width: 130px; 
+    height: 130px; 
+  }
   .tetris-dpad .dpad { width: 48px; height: 48px; font-size: 18px; }
+  .tetris-dpad .dpad.left { left: 0px; }
+  .tetris-dpad .dpad.right { right: 0px; }
+  .tetris-dpad .dpad.down { bottom: 0px; }
 }
 
 /* Tetris touch controls - grid (old) hidden as we replaced with dpad+right panel */
