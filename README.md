@@ -50,6 +50,7 @@ MixedFood/
 - 俄罗斯方块：方向键移动和旋转，空格直落。
 - クアントアタック：方向键移动，空格切换框架，回车交换方块。
 
+
 ## 存储与最高分
 - 扫雷：最佳用时存于 `localStorage`（键：`minesweeperBestTime`）。
 - 贪吃蛇：最高分存于 `localStorage`（键：`snakeHighScore`）。
